@@ -10,6 +10,7 @@ import com.spaceprogram.db4o.util.DbUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Assert;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -56,6 +57,7 @@ public class SqlTest {
     public void testQueryResults() throws SQLException {
 
         // todo: assert that soda results equal sql results
+        int sodaCount = 0;
         // lets time a sode query vs the jdbc
         {
             System.out.println("Soda query...");
@@ -69,6 +71,7 @@ public class SqlTest {
             for (Object o : results) {
                 Contact c = (Contact) o;
                 System.out.println("got: " + c);
+                sodaCount++;
             }
             long endTime = System.currentTimeMillis();
             long duration = endTime - startTime;
@@ -76,6 +79,7 @@ public class SqlTest {
             oc.close();
         }
 
+        int sqlCount = 0;
         {
             // now same query with sql
             System.out.println("SQL query");
@@ -93,10 +97,9 @@ public class SqlTest {
                 SqlQuery sqlQuery = (SqlQuery) SqlParser.parse(query);
                 List results = SQLToSoda.execute(oc, sqlQuery);
 
-                int counter = 0;
                 for (Object result : results) {
                     System.out.println("Got: " + result);
-                    counter++;
+                    sqlCount++;
                 }
                 long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
@@ -111,6 +114,7 @@ public class SqlTest {
                 oc.close();
             }
         }
+        Assert.assertEquals(sodaCount, sqlCount);
     }
 
 
