@@ -7,10 +7,7 @@ import com.spaceprogram.db4o.Contact;
 import com.spaceprogram.db4o.TestUtils;
 import com.spaceprogram.db4o.sql.parser.SQLParseException;
 import com.spaceprogram.db4o.util.DbUtil;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.Assert;
+import org.junit.*;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -23,6 +20,7 @@ import java.util.List;
 public class SqlTest {
 
     static ObjectServer server;
+    private ObjectContainer oc;
 
     @BeforeClass
     public static void setupDb() {
@@ -46,6 +44,16 @@ public class SqlTest {
         server.close();
     }
 
+    @Before
+    public void beforeEach() {
+        oc = server.openClient();
+    }
+
+    @After
+    public void afterEach() {
+        oc.close();
+    }
+
     /**
      * - test query time vs normal soda query
      * - test that correct number of results are returned
@@ -54,7 +62,7 @@ public class SqlTest {
      * @throws SQLException
      */
     @Test
-    public void testQueryResults() throws SQLException {
+    public void testQueryResults() throws SQLException, SQLParseException, ClassNotFoundException {
 
         // todo: assert that soda results equal sql results
         int sodaCount = 0;
@@ -83,33 +91,25 @@ public class SqlTest {
         {
             // now same query with sql
             System.out.println("SQL query");
-            // get JDBC connection
-
-             ObjectContainer oc = server.openClient();
+            ObjectContainer oc = server.openClient();
             try {
                 long startTime = System.currentTimeMillis();
 
                 // execute query
                 String query = "select * from com.spaceprogram.db4o.Contact c where " +
-                        "name = 'contact 2' and " + //  and email = 'email@2.com'
+                        " name = 'contact 2' and " + //  and email = 'email@2.com'
                         " category = 'friends'";
 
-                SqlQuery sqlQuery = (SqlQuery) SqlParser.parse(query);
-                List results = SQLToSoda.execute(oc, sqlQuery);
+                List<Result> results = Sql4o.execute(oc, query);
 
-                for (Object result : results) {
-                    System.out.println("Got: " + result);
+                for (Result result : results) {
+                    System.out.println("Got: ");
+                    TestUtils.displaySqlResult(result);
                     sqlCount++;
                 }
                 long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
                 System.out.println("SQL duration: " + duration);
-
-
-            } catch (SQLParseException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
             } finally {
                 oc.close();
             }
@@ -117,5 +117,77 @@ public class SqlTest {
         Assert.assertEquals(sodaCount, sqlCount);
     }
 
+    @Test
+    public void testSelectFieldsQuery() throws SQLParseException, ClassNotFoundException {
+        // execute query
+        String query = "select name, age from com.spaceprogram.db4o.Contact c where " +
+                "name = 'contact 2' and " + //  and email = 'email@2.com'
+                " category = 'friends'";
 
+        SqlQuery sqlQuery = (SqlQuery) SqlParser.parse(query);
+        List<Result> results = SqlToSoda.execute(oc, sqlQuery);
+        TestUtils.displaySqlResults(results);
+
+        Assert.assertEquals(1, results.size());
+        // get by index
+        Result result = results.get(0);
+        Assert.assertEquals("contact 2", result.getObject(0));
+
+        // get by name
+        Assert.assertEquals(20, result.getObject("age"));
+    }
+
+    @Test(expected = Sql4oRuntimeException.class)
+    public void testFieldExceptions() throws SQLParseException, ClassNotFoundException {
+        // execute query
+        String query = "select name, age from com.spaceprogram.db4o.Contact c where " +
+                "name = 'contact 2' and " + //  and email = 'email@2.com'
+                " category = 'friends'";
+
+        SqlQuery sqlQuery = (SqlQuery) SqlParser.parse(query);
+        List<Result> results = SqlToSoda.execute(oc, sqlQuery);
+        TestUtils.displaySqlResults(results);
+
+        Result result = results.get(0);
+        Object somefield = result.getObject("somefield"); // this should throw, but it's expected
+    }
+
+    @Test
+    public void testAsteriskQuery() throws SQLParseException, ClassNotFoundException {
+        // execute query
+        String query = "select * from com.spaceprogram.db4o.Contact c where " +
+                "name = 'contact 2' and " + //  and email = 'email@2.com'
+                " category = 'friends'";
+
+        SqlQuery sqlQuery = (SqlQuery) SqlParser.parse(query);
+        List<Result> results = SqlToSoda.execute(oc, sqlQuery);
+        TestUtils.displaySqlResults(results);
+
+        Assert.assertEquals(1, results.size());
+        // get by index
+        Result result = results.get(0);
+        Assert.assertEquals("contact 2", result.getObject("name"));
+
+        // get by name
+        Assert.assertEquals(20, result.getObject("age"));
+    }
+
+    @Test
+    public void testNoSelectQuery() throws SQLParseException, ClassNotFoundException {
+        // execute query
+        String query = "from com.spaceprogram.db4o.Contact c where " +
+                "name = 'contact 2' and " + //  and email = 'email@2.com'
+                " category = 'friends'";
+
+        SqlQuery sqlQuery = (SqlQuery) SqlParser.parse(query);
+        List<Result> results = SqlToSoda.execute(oc, sqlQuery);
+        TestUtils.displaySqlResults(results);
+
+        Assert.assertEquals(1, results.size());
+
+        Result result = results.get(0);
+        Assert.assertEquals("contact 2", result.getObject("name"));
+
+        Assert.assertEquals(20, result.getObject("age"));
+    }
 }

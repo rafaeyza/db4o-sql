@@ -48,4 +48,15 @@ public class ObjectContainerUtils {
         System.out.println("END DUMP: " + oc.ext().identity());
         return counter;
     }
+    public static int dump(ObjectContainer oc, Class aClass) {
+        System.out.println("DUMPING: " + oc.ext().identity());
+        List results = oc.query(aClass);
+        int counter = 0;
+        for (Object o : results) {
+            System.out.println("object: " + o);
+            counter++;
+        }
+        System.out.println("END DUMP: " + oc.ext().identity());
+        return counter;
+    }
 }
