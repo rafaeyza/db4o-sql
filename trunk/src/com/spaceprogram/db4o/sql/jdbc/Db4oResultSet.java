@@ -363,6 +363,8 @@ public class Db4oResultSet implements ResultSet {
     public String getString(String columnName) throws SQLException {
         // get current object
         Object o = results.get(index);
+        // we'd have an Object[] here
+        // todo: might need to look at the ObjectSetWrapper to see what to expect here
         // do getter
         Class c = o.getClass();
         //System.out.println("for class: " + c);
