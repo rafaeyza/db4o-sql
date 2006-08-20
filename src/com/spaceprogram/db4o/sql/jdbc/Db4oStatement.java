@@ -8,7 +8,7 @@ import com.spaceprogram.db4o.sql.SqlParser;
 import com.spaceprogram.db4o.sql.SqlStatement;
 import com.spaceprogram.db4o.sql.SqlQuery;
 import com.spaceprogram.db4o.sql.SqlToSoda;
-import com.spaceprogram.db4o.sql.parser.SQLParseException;
+import com.spaceprogram.db4o.sql.parser.SqlParseException;
 
 /**
  * User: treeder
@@ -39,8 +39,8 @@ public class Db4oStatement implements Statement {
         SqlStatement statement = null;
         try {
             statement = SqlParser.parse(query);
-        } catch (SQLParseException e) {
-            throw new SQLException(e);
+        } catch (SqlParseException e) {
+            throw new SQLException(e.getMessage());
         }
         if(statement instanceof SqlQuery){
             results = queryDB((SqlQuery) statement);
@@ -56,7 +56,7 @@ public class Db4oStatement implements Statement {
         try {
             return SqlToSoda.execute(conn.getObjectContainer(), q);
         } catch (ClassNotFoundException e) {
-            throw new SQLException(e);
+            throw new SQLException(e.getMessage());
         }
     }
 

@@ -2420,21 +2420,6 @@ public class Db4oResultSet implements ResultSet {
 
     }
 
-    public RowId getRowId(int columnIndex) throws SQLException {
-        return null;
-    }
-
-    public RowId getRowId(String columnLabel) throws SQLException {
-        return null;
-    }
-
-    public void updateRowId(int columnIndex, RowId x) throws SQLException {
-
-    }
-
-    public void updateRowId(String columnLabel, RowId x) throws SQLException {
-
-    }
 
     public int getHoldability() throws SQLException {
         return 0;
@@ -2449,38 +2434,6 @@ public class Db4oResultSet implements ResultSet {
     }
 
     public void updateNString(String columnLabel, String nString) throws SQLException {
-
-    }
-
-    public void updateNClob(int columnIndex, NClob nClob) throws SQLException {
-
-    }
-
-    public void updateNClob(String columnLabel, NClob nClob) throws SQLException {
-
-    }
-
-    public NClob getNClob(int columnIndex) throws SQLException {
-        return null;
-    }
-
-    public NClob getNClob(String columnLabel) throws SQLException {
-        return null;
-    }
-
-    public SQLXML getSQLXML(int columnIndex) throws SQLException {
-        return null;
-    }
-
-    public SQLXML getSQLXML(String columnLabel) throws SQLException {
-        return null;
-    }
-
-    public void updateSQLXML(int columnIndex, SQLXML xmlObject) throws SQLException {
-
-    }
-
-    public void updateSQLXML(String columnLabel, SQLXML xmlObject) throws SQLException {
 
     }
 

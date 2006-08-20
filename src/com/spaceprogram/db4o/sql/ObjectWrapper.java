@@ -38,4 +38,8 @@ public class ObjectWrapper implements Result{
         return getFieldValue(f, ob);
     }
 
+    public Object getBaseObject(int objectIndex) {
+        return ob;
+    }
+
 }
