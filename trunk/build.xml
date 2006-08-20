@@ -5,7 +5,7 @@
     <!-- set global properties for this build -->
     <property name="src" location="src"/>
     <property name="lib" location="lib"/>
-    <property name="build" location="build"/>
+    <property name="build" location="classes"/>
     <property name="dist" location="dist"/>
 
     <path id="class.path">
@@ -35,7 +35,7 @@
         <mkdir dir="${dist}/lib"/>
 
         <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
-        <jar jarfile="${dist}/lib/${ant.project.name}-${DSTAMP}.jar" basedir="${build}"/>
+        <jar jarfile="${dist}/lib/${ant.project.name}.jar" basedir="${build}"/>
     </target>
 
     <target name="clean"

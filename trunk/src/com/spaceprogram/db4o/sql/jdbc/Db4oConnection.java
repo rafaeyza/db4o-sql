@@ -838,24 +838,9 @@ public class Db4oConnection implements Connection {
         return null;
     }
 
-    public NClob createNClob() throws SQLException {
-        return null;
-    }
-
-    public SQLXML createSQLXML() throws SQLException {
-        return null;
-    }
 
     public boolean isValid(int timeout) throws SQLException {
         return false;
-    }
-
-    public void setClientInfo(String name, String value) throws SQLClientInfoException {
-
-    }
-
-    public void setClientInfo(Properties properties) throws SQLClientInfoException {
-
     }
 
     public String getClientInfo(String name) throws SQLException {
@@ -863,14 +848,6 @@ public class Db4oConnection implements Connection {
     }
 
     public Properties getClientInfo() throws SQLException {
-        return null;
-    }
-
-    public <T extends BaseQuery> T createQueryObject(Class<T> ifc) throws SQLException {
-        return null;
-    }
-
-    public <T extends BaseQuery> T createQueryObject(Class<T> ifc, Connection con) throws SQLException {
         return null;
     }
 

@@ -5,7 +5,7 @@ import com.db4o.ObjectServer;
 import com.db4o.query.Query;
 import com.spaceprogram.db4o.Contact;
 import com.spaceprogram.db4o.TestUtils;
-import com.spaceprogram.db4o.sql.parser.SQLParseException;
+import com.spaceprogram.db4o.sql.parser.SqlParseException;
 import com.spaceprogram.db4o.util.DbUtil;
 import org.junit.*;
 
@@ -62,7 +62,7 @@ public class SqlTest {
      * @throws SQLException
      */
     @Test
-    public void testQueryResults() throws SQLException, SQLParseException, ClassNotFoundException {
+    public void testQueryResults() throws SQLException, SqlParseException, ClassNotFoundException, Sql4oException {
 
         // todo: assert that soda results equal sql results
         int sodaCount = 0;
@@ -118,8 +118,7 @@ public class SqlTest {
     }
 
     @Test
-    public void testSelectFieldsQuery() throws SQLParseException, ClassNotFoundException {
-        // execute query
+    public void testSelectFieldsQuery() throws SqlParseException, ClassNotFoundException {
         String query = "select name, age from com.spaceprogram.db4o.Contact c where " +
                 "name = 'contact 2' and " + //  and email = 'email@2.com'
                 " category = 'friends'";
@@ -138,8 +137,7 @@ public class SqlTest {
     }
 
     @Test(expected = Sql4oRuntimeException.class)
-    public void testFieldExceptions() throws SQLParseException, ClassNotFoundException {
-        // execute query
+    public void testFieldExceptions() throws SqlParseException, ClassNotFoundException {
         String query = "select name, age from com.spaceprogram.db4o.Contact c where " +
                 "name = 'contact 2' and " + //  and email = 'email@2.com'
                 " category = 'friends'";
@@ -153,8 +151,7 @@ public class SqlTest {
     }
 
     @Test
-    public void testAsteriskQuery() throws SQLParseException, ClassNotFoundException {
-        // execute query
+    public void testAsteriskQuery() throws SqlParseException, ClassNotFoundException {
         String query = "select * from com.spaceprogram.db4o.Contact c where " +
                 "name = 'contact 2' and " + //  and email = 'email@2.com'
                 " category = 'friends'";
@@ -173,8 +170,7 @@ public class SqlTest {
     }
 
     @Test
-    public void testNoSelectQuery() throws SQLParseException, ClassNotFoundException {
-        // execute query
+    public void testNoSelectQuery() throws SqlParseException, ClassNotFoundException {
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 "name = 'contact 2' and " + //  and email = 'email@2.com'
                 " category = 'friends'";
