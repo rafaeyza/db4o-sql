@@ -1,6 +1,6 @@
 package com.spaceprogram.db4o.sql;
 
-import com.spaceprogram.db4o.sql.parser.SqlParseException2;
+import com.spaceprogram.db4o.sql.parser.SqlParseException;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -26,28 +26,28 @@ public class SqlParser {
     private List<String> quotedStrings = new ArrayList<String>();
 
 
-    public static SqlStatement parse(String query) throws SqlParseException2 {
+    public static SqlStatement parse(String query) throws SqlParseException {
         SqlParser parser = new SqlParser();
         parser.setQuery(query);
         return parser.doParse();
 
     }
 
-    private SqlStatement doParse() throws SqlParseException2 {
+    private SqlStatement doParse() throws SqlParseException {
         // what to do for quoted strings that might have spaces in them??? hmmm, how about taking those out right now and replacing them with tokens
         query = replaceQuotedStrings(query);
 
         String[] split = query.trim().split("\\s+"); // split by white space
         // preliminary checks
         if(split.length < 2){
-            throw new SqlParseException2("Invalid query.");
+            throw new SqlParseException("Invalid query.");
         }
         // now build up query into different parts
         SqlQuery sq = new SqlQuery();
         buildQuery(split, sq);
         // ensure that the correct pieces are here
         if(sq.getFrom() == null){
-            throw new SqlParseException2("No FROM part!");
+            throw new SqlParseException("No FROM part!");
         }
         return sq;
     }
@@ -78,7 +78,7 @@ public class SqlParser {
         return ret;
     }
 
-    private void buildQuery(String[] split, SqlQuery sq) throws SqlParseException2 {
+    private void buildQuery(String[] split, SqlQuery sq) throws SqlParseException {
         // look for keywords
         Builder curBuilder = null;
         List<String> expr = new ArrayList<String>();
@@ -97,7 +97,7 @@ public class SqlParser {
         if (expr.size() > 0) {
             if(curBuilder != null)
             curBuilder.build(sq, expr);
-            else throw new SqlParseException2("Invalid Query. No FROM part.");
+            else throw new SqlParseException("Invalid Query. No FROM part.");
         }
     }
 
@@ -126,7 +126,7 @@ public class SqlParser {
     interface Builder {
         String getKeyword();
 
-        void build(SqlQuery sq, List<String> expr) throws SqlParseException2;
+        void build(SqlQuery sq, List<String> expr) throws SqlParseException;
     }
 
     static class SelectBuilder implements Builder {
@@ -203,7 +203,7 @@ public class SqlParser {
             return keyword;
         }
 
-        public void build(SqlQuery sq, List<String> expressionSplit) throws SqlParseException2 {
+        public void build(SqlQuery sq, List<String> expressionSplit) throws SqlParseException {
             // where clauses are tree like structures
             /*
             samples:
@@ -216,7 +216,7 @@ public class SqlParser {
 
         }
 
-        private int buildExpr(WhereExpression root, List<String> expressionSplit, int index) throws SqlParseException2 {
+        private int buildExpr(WhereExpression root, List<String> expressionSplit, int index) throws SqlParseException {
 
             // todo: support BETWEEN x AND y
             Pattern pattern = Pattern.compile(REGEX_OPERATORS);
@@ -262,7 +262,7 @@ public class SqlParser {
                     String value = null;
                     int extraPiecesUsed = 0;
                     if (found > 1) {
-                        throw new SqlParseException2("Too many operators in where expression: " + s);
+                        throw new SqlParseException("Too many operators in where expression: " + s);
                     } else if (found == 1) {
                         // then it's on this first token
                         MatchResult matchResult = matches.get(0);
@@ -278,7 +278,7 @@ public class SqlParser {
                         List<MatchResult> matches2 = findMatches(matcher2);
                         int found2 = matches2.size();
                         if (found2 > 1) {
-                            throw new SqlParseException2("Too many operators in where expression: " + s);
+                            throw new SqlParseException("Too many operators in where expression: " + s);
                         } else if (found2 == 1) {
                             // then all good
                             MatchResult matchResult = matches2.get(0);
@@ -288,7 +288,7 @@ public class SqlParser {
                                 value = s.substring(matchResult.end(), s.length());
                             }
                         } else {
-                            throw new SqlParseException2("Operator not found in where expression.");
+                            throw new SqlParseException("Operator not found in where expression.");
                         }
                         extraPiecesUsed++;
                     }
@@ -311,7 +311,7 @@ public class SqlParser {
                     if(field == null || field.length() < 1
                     || operator == null || operator.length() < 1
                     || value == null || value.length() < 1){
-                        throw new SqlParseException2("Incomplete where expression.");
+                        throw new SqlParseException("Incomplete where expression.");
                     }
 
                     current.setField(field);
