@@ -1,5 +1,7 @@
 package com.spaceprogram.db4o.sql;
 
+import com.db4o.reflect.ReflectField;
+
 import java.lang.reflect.Field;
 
 /**
@@ -7,8 +9,9 @@ import java.lang.reflect.Field;
  * Date: Aug 14, 2006
  * Time: 2:51:16 PM
  */
-public class ObjectWrapper implements Result{
+public class ObjectWrapper implements Result {
     private Object ob;
+    // todo: shouldn't hold onto this ObjectSetWrapper, might create memory leaks
     private ObjectSetWrapper objectSetWrapper;
 
     public ObjectWrapper(ObjectSetWrapper objectSetWrapper, Object ob) {
@@ -16,27 +19,20 @@ public class ObjectWrapper implements Result{
         this.ob = ob;
     }
 
-    public int getColumnCount() {
-        return objectSetWrapper.getColumnCount();
-    }
-
     public Object getObject(int fieldIndex) {
-        Field f = objectSetWrapper.getFieldForColumn(ob, fieldIndex);
+        ReflectField f = objectSetWrapper.getFieldForColumn(ob, fieldIndex);
         return getFieldValue(f, ob);
-    }
-
-    private Object getFieldValue(Field f, Object ob) {
-        try {
-            return f.get(ob);
-        } catch (IllegalAccessException e) {
-            throw new Sql4oRuntimeException(e);
-        }
     }
 
     public Object getObject(String fieldName) {
-        Field f = objectSetWrapper.getFieldForColumn(ob, fieldName);
+        ReflectField f = objectSetWrapper.getFieldForColumn(ob, fieldName);
         return getFieldValue(f, ob);
     }
+
+    private Object getFieldValue(ReflectField f, Object ob) {
+        return f.get(ob);
+    }
+
 
     public Object getBaseObject(int objectIndex) {
         return ob;

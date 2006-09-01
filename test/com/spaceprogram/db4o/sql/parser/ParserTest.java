@@ -19,6 +19,12 @@ public class ParserTest {
                 , new QueryString("select * from Contact c where c.id = 123 AND c.name = 'contact 1'", "select * from Contact c where c.id = 123 AND c.name = 'contact 1'")
                 , new QueryString("select c.id, c.name from Contact c where c.id = 123 and ( c.name = 'contact 1' or c.name = 'contact 2' )")
                 , new QueryString("select c.id, c.name from Contact c where c.id = 123 and (c.name='contact 1' or c.name='contact 2')", "select c.id, c.name from Contact c where c.id = 123 and ( c.name = 'contact 1' or c.name = 'contact 2' )")
+                , new QueryString("from com.spaceprogram.db4o.Contact c where " +
+                "(age = 10 or age = 20) and " +
+                "income = 50000.02", 
+                "from com.spaceprogram.db4o.Contact c where " +
+                "( age = 10 or age = 20 ) and " +
+                "income = 50000.02")
                };
         for (int i = 0; i < queryStringsToTest.length; i++) {
             QueryString s = queryStringsToTest[i];
@@ -51,7 +57,8 @@ public class ParserTest {
                 "asdf",
                 "select asdf",
                 "select x from",
-                "from"
+                "from",
+                "from x where name'",
         };
         for (int i = 0; i < queries.length; i++) {
             String query = queries[i];

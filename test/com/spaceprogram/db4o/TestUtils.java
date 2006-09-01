@@ -4,6 +4,7 @@ import com.db4o.ObjectContainer;
 import com.db4o.query.Query;
 import com.spaceprogram.db4o.util.ObjectContainerUtils;
 import com.spaceprogram.db4o.sql.Result;
+import com.spaceprogram.db4o.sql.ObjectSetWrapper;
 
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class TestUtils {
             c.setEmail("email@" + i + ".com");
             c.setCategory("friends");
             c.setAge(i * 10);
+            if(i < 5) c.setIncome(50000.02);
+            else c.setIncome(61000.67);
             oc.set(c);
             contactNumber++;
         }
@@ -34,7 +37,7 @@ public class TestUtils {
     }
 
 
-    public static int clearObjects(ObjectContainer oc, Class aClass) {
+    public static int clear(ObjectContainer oc, Class aClass) {
         return ObjectContainerUtils.clear(oc, aClass);
     }
 
@@ -43,16 +46,42 @@ public class TestUtils {
     }
 
     public static void displaySqlResults(List<Result> results) {
+        int columnCount = ((ObjectSetWrapper)results).getMetaData().getColumnCount();
         for (Result result : results) {
-            System.out.println("Got: ");
-            displaySqlResult(result);
+            System.out.print("Got: " + result.getBaseObject(0) + " : ");
+            displaySqlResult(result, columnCount);
+            System.out.println();
         }
     }
 
-    public static void displaySqlResult(Result result) {
-        for (int i = 0; i < result.getColumnCount(); i++) {
+    public static void displaySqlResult(Result result, int columnCount) {
+        for (int i = 0; i < columnCount; i++) {
             Object o = result.getObject(i);
-            System.out.println(i + " = " + o);
+            System.out.print("field" + i + "=" + o + " ");
         }
+    }
+
+    public static int dump(ObjectContainer oc) {
+        System.out.println("DUMPING: " + oc.ext().identity());
+        Query q = oc.query();
+        List results = q.execute();
+        int counter = 0;
+        for (Object o : results) {
+            System.out.println("object: " + o);
+            counter++;
+        }
+        System.out.println("END DUMP: " + oc.ext().identity());
+        return counter;
+    }
+    public static int dump(ObjectContainer oc, Class aClass) {
+        System.out.println("DUMPING: " + oc.ext().identity());
+        List results = oc.query(aClass);
+        int counter = 0;
+        for (Object o : results) {
+            System.out.println("object: " + o);
+            counter++;
+        }
+        System.out.println("END DUMP: " + oc.ext().identity());
+        return counter;
     }
 }

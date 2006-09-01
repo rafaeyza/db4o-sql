@@ -15,13 +15,7 @@ import java.util.List;
 public class Sql4o {
     public static List<Result> execute(ObjectContainer oc, String query) throws SqlParseException, Sql4oException {
         SqlQuery sqlQuery = (SqlQuery) SqlParser.parse(query);
-        List<Result> results = null;
-        try {
-            results = SqlToSoda.execute(oc, sqlQuery);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            throw new Sql4oException(e.getMessage());
-        }
+        List<Result> results = SqlToSoda.execute(oc, sqlQuery);
         return results;
     }
 }

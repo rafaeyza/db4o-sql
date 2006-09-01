@@ -9,6 +9,9 @@ import java.util.regex.Matcher;
 import java.util.regex.MatchResult;
 
 /**
+ * This is a core class that will do the parsing of an SQL string and return that string in an object format.
+ * There are no ties to db4o in in this class.
+ * <p/>
  * User: treeder
  * Date: Jul 26, 2006
  * Time: 6:05:54 PM
@@ -39,14 +42,14 @@ public class SqlParser {
 
         String[] split = query.trim().split("\\s+"); // split by white space
         // preliminary checks
-        if(split.length < 2){
+        if (split.length < 2) {
             throw new SqlParseException("Invalid query.");
         }
         // now build up query into different parts
         SqlQuery sq = new SqlQuery();
         buildQuery(split, sq);
         // ensure that the correct pieces are here
-        if(sq.getFrom() == null){
+        if (sq.getFrom() == null) {
             throw new SqlParseException("No FROM part!");
         }
         return sq;
@@ -71,7 +74,7 @@ public class SqlParser {
             i++;
         }
         if (!found) {
-          //  System.out.println("No match found.");
+            //  System.out.println("No match found.");
         }
         String ret = buff.toString();
         //System.out.println("query changed to: " + ret);
@@ -95,8 +98,8 @@ public class SqlParser {
             }
         }
         if (expr.size() > 0) {
-            if(curBuilder != null)
-            curBuilder.build(sq, expr);
+            if (curBuilder != null)
+                curBuilder.build(sq, expr);
             else throw new SqlParseException("Invalid Query. No FROM part.");
         }
     }
@@ -217,14 +220,14 @@ public class SqlParser {
         }
 
         private int buildExpr(WhereExpression root, List<String> expressionSplit, int index) throws SqlParseException {
-
+            //System.out.println("slit.size= " + expressionSplit.size() + " " + expressionSplit);
             // todo: support BETWEEN x AND y
             Pattern pattern = Pattern.compile(REGEX_OPERATORS);
             WhereExpression current = new WhereExpression();
             int i = index;
             for (; i < expressionSplit.size(); i++) {
                 String s = expressionSplit.get(i);
-              //  System.out.println("WHERE expr: " + s);
+                //System.out.println("WHERE expr: " + s);
                 if (s.startsWith("(")) {
                     // then start of a sub expression - recurse
                     String token;
@@ -236,20 +239,20 @@ public class SqlParser {
                         expressionSplit.add(i + 1, token);
                     }
                     i++;
-              //      System.out.println("Making sub expr");
+                    //      System.out.println("Making sub expr");
                     WhereExpression sub = new WhereExpression();
                     root.add(sub);
                     i = buildExpr(sub, expressionSplit, i);
                 } else if (s.equals(")")) {
-                    //  System.out.println("found end token");
+                    //System.out.println("found end token");
                     return i;
 
-                } else if (s.equalsIgnoreCase("and")) {
+                } else if (s.equalsIgnoreCase(WhereExpression.AND)) {
                     // then new expression
-                    current = new WhereExpression("AND");
+                    current = new WhereExpression(WhereExpression.AND);
                     //root.add(current);
-                } else if (s.equalsIgnoreCase("or")) {
-                    current = new WhereExpression("OR");
+                } else if (s.equalsIgnoreCase(WhereExpression.OR)) {
+                    current = new WhereExpression(WhereExpression.OR);
                     //root.add(current);
                 } else {
                     // otherwise, just normal expression body - ex: name = 'something' or name='something''
@@ -274,6 +277,7 @@ public class SqlParser {
                         field = s;
                         // check next piece
                         String s2 = expressionSplit.get(i + 1);
+                        //System.out.println("s2=" + s2);
                         Matcher matcher2 = pattern.matcher(s2);
                         List<MatchResult> matches2 = findMatches(matcher2);
                         int found2 = matches2.size();
@@ -287,6 +291,7 @@ public class SqlParser {
                             if (s2.length() > matchResult.end()) {
                                 value = s.substring(matchResult.end(), s.length());
                             }
+
                         } else {
                             throw new SqlParseException("Operator not found in where expression.");
                         }
@@ -296,28 +301,29 @@ public class SqlParser {
                         // must be next piece
                         // todo: check for list size before this and the same above
                         value = expressionSplit.get(i + extraPiecesUsed + 1);
-              //          System.out.println("value here: " + value);
+                        //          System.out.println("value here: " + value);
                         extraPiecesUsed++;
                     }
-                    if(value.endsWith(")")){
+                    //System.out.println("full expression found: " + field + "," + operator + "," + value);
+                    if (value.endsWith(")")) {
                         value = value.substring(0, value.length() - 1);
-                        expressionSplit.add(i+1, ")");
+                        expressionSplit.add(i + extraPiecesUsed + 1, ")");
                     }
                     // check if value was replaced
                     value = replaceValue(value);
-              //      System.out.println("replaced with: " + value);
+                    //      System.out.println("replaced with: " + value);
                     i += extraPiecesUsed;
 
-                    if(field == null || field.length() < 1
-                    || operator == null || operator.length() < 1
-                    || value == null || value.length() < 1){
+                    if (field == null || field.length() < 1
+                            || operator == null || operator.length() < 1
+                            || value == null || value.length() < 1) {
                         throw new SqlParseException("Incomplete where expression.");
                     }
 
                     current.setField(field);
                     current.setOperator(operator);
                     current.setValue(value);
-              //      System.out.println("current: " + current);
+                    //      System.out.println("current: " + current);
                     root.add(current);
                 }
             }
