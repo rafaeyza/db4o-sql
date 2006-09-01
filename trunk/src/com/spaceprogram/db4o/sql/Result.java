@@ -6,8 +6,7 @@ package com.spaceprogram.db4o.sql;
  * Time: 2:53:24 PM
  */
 public interface Result {
-    int getColumnCount();
-
+    
     /**
      * The getObject(String) method is recommended over this one in case the field order changes.
      *

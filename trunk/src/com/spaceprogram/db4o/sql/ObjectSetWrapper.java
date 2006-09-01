@@ -1,7 +1,12 @@
 package com.spaceprogram.db4o.sql;
 
 import com.db4o.ObjectSet;
+import com.db4o.ObjectContainer;
 import com.db4o.reflect.generic.GenericObject;
+import com.db4o.reflect.generic.GenericVirtualField;
+import com.db4o.reflect.generic.GenericReflector;
+import com.db4o.reflect.ReflectField;
+import com.db4o.reflect.ReflectClass;
 import com.db4o.ext.ExtObjectSet;
 
 import java.util.List;
@@ -11,6 +16,7 @@ import java.util.ListIterator;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 
+
 /**
  * User: treeder
  * Date: Aug 3, 2006
@@ -19,98 +25,75 @@ import java.sql.SQLException;
 public class ObjectSetWrapper implements ObjectSet {
     private ObjectSet results;
     private List<String> selectFields;
-    private boolean initialized;
     private int index;
     private Object lastResult;
     private Object nextResult;
-    private int columnCount;
+    private ObjectSetMetaData objectSetMetaData;
+    private ObjectContainer oc;
 
 
-    /**
-     * todo: move this into an ObjectSetMetaData interface
-     *
-     * @return
-     */
-    public int getColumnCount() {
-        init();
-        return columnCount;
+    public ObjectSetWrapper(ObjectContainer oc) {
+        this.oc = oc;
     }
 
-    private void init() {
-        if (!initialized) {
-            // examine objects in result set
-            // guess we'll have to get an object here first
-            if (lastResult != null) {
-                init(lastResult);
-            } else if (results.hasNext()) {
-                nextResult = results.next();
-                init(nextResult);
-            }
-            initialized = true;
+    public ObjectSetMetaData getMetaData() {
+        if (objectSetMetaData == null) {
+            objectSetMetaData = new ObjectSetMetaDataImpl(results, this, oc);
         }
+        return objectSetMetaData;
     }
 
-    private void init(Object lastResult) {
-        if (hasSelectFields()) {
-            columnCount = selectFields.size();
-        } else {
-            Class c = lastResult.getClass();
-            columnCount = c.getDeclaredFields().length;
-        }
-    }
 
     /**
      * This will check the select fields if exists, otherwise it will use the fields on the object
+     * todo: could cache the fields for an object here for super fast return
      *
      * @param ob
      * @param columnIndex
      * @return
      */
-    public Field getFieldForColumn(Object ob, int columnIndex) {
+    public ReflectField getFieldForColumn(Object ob, int columnIndex) {
+        ReflectClass reflectClass = oc.ext().reflector().forObject(ob);
         if (hasSelectFields() && selectFields.size() > columnIndex) {
-            try {
-                return getField(ob.getClass(), selectFields.get(columnIndex));
-            } catch (NoSuchFieldException e) {
-                throw new Sql4oRuntimeException(e);
-            }
+            return getField(reflectClass, selectFields.get(columnIndex));
         } else {
-            return getField(ob.getClass(), columnIndex);
+            return getField(reflectClass, columnIndex);
         }
     }
 
-    public Field getFieldForColumn(Object ob, String fieldName) {
+    public ReflectField getFieldForColumn(Object ob, String fieldName) {
         if (hasSelectFields() && !selectFields.contains(fieldName)) {
             throw new Sql4oRuntimeException("Field not found in select list: " + fieldName);
         }
-        try {
-            return getField(ob.getClass(), fieldName);
-        } catch (NoSuchFieldException e) {
-            throw new Sql4oRuntimeException(e);
-        }
+        ReflectClass reflectClass = oc.ext().reflector().forObject(ob);
+        return getField(reflectClass, fieldName);
+
 
     }
 
-    private Field getField(Class<? extends Object> aClass, int columnIndex) {
-        Field[] fields = aClass.getDeclaredFields();
+    private ReflectField getField(ReflectClass aClass, int columnIndex) {
+        ReflectField[] fields = ReflectHelper.getDeclaredFields(aClass);
         if (fields.length <= columnIndex || columnIndex < 0) {
             // then out of bounds, so throw
             throw new Sql4oRuntimeException("Field index out of bounds. received: " + columnIndex + " max: " + fields.length);
         } else {
-            Field ret = fields[columnIndex];
-            ret.setAccessible(true);
+            ReflectField ret = fields[columnIndex];
+            ret.setAccessible();
             return ret;
         }
 
     }
 
-    private Field getField(Class<? extends Object> aClass, String fieldName) throws NoSuchFieldException {
-        // todo: check for generic object here and try to use that GenericObject genericObject = 
-        Field field = aClass.getDeclaredField(fieldName);
-        field.setAccessible(true);
+
+
+    private ReflectField getField(ReflectClass aClass, String fieldName) {
+        // todo: check for generic object here and try to use that GenericObject genericObject =
+        ReflectField field = aClass.getDeclaredField(fieldName);
+        field.setAccessible();
         return field;
     }
 
-    private boolean hasSelectFields() {
+    public boolean hasSelectFields() {
         return (selectFields != null && selectFields.size() > 0 && !selectFields.get(0).equals("*"));
     }
 
@@ -119,7 +102,7 @@ public class ObjectSetWrapper implements ObjectSet {
      *
      * @param next
      * @return
-     * @deprecated 
+     * @deprecated
      */
     private Object[] arrayStruct(Object next) throws SQLException {
         System.out.println("making array");
@@ -163,6 +146,7 @@ public class ObjectSetWrapper implements ObjectSet {
     }
 
     public boolean hasNext() {
+        if(nextResult != null) return true;
         return results.hasNext();
     }
 
@@ -308,4 +292,24 @@ public class ObjectSetWrapper implements ObjectSet {
         this.selectFields = selectFields;
     }
 
+    public Object getLastResult() {
+        return lastResult;
+    }
+
+    /**
+     * This should only be used in very rare circumstances
+     *
+     * @param nextResult
+     */
+    public void setNextResult(Object nextResult) {
+        this.nextResult = nextResult;
+    }
+
+    public List getSelectFields() {
+        return selectFields;
+    }
+
+    public GenericReflector getReflector() {
+        return oc.ext().reflector();
+    }
 }

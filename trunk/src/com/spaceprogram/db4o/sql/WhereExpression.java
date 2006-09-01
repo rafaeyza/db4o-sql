@@ -8,13 +8,27 @@ import java.util.ArrayList;
  * Date: Aug 1, 2006
  * Time: 11:53:01 AM
  */
-public class WhereExpression {
+public class WhereExpression implements Cloneable{
+
+    public static final String OP_EQUALS = "=";
+    public static final String OP_GREATER = ">";
+    public static final String OP_GREATER_OR_EQUAL = ">=";
+    public static final String OP_LESS = "<";
+    public static final String OP_LESS_OR_EQUAL = "<=";
+    public static final String AND = "AND";
+    public static final String OR = "OR";
+    
     private List<WhereExpression> expressions = new ArrayList<WhereExpression>();
-    private String type = "AND"; // and/or
+    private String type = AND;
     private String field;
     private String operator;
     private String value;
     private boolean root;
+
+
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
     public WhereExpression(String type) {
         this.type = type;

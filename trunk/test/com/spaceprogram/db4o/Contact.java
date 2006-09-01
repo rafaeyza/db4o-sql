@@ -12,6 +12,7 @@ public class Contact  {
     private String email;
     private int age;
     private String category;
+    private double income;
 
     public Integer getId() {
         return id;
@@ -30,7 +31,7 @@ public class Contact  {
     }
 
     public String toString() {
-        return "[" + id + "] " + name;
+        return "Contact [" + id + "]: name=" + name + " age=" + age + " category=" + category;
     }
 
     public void setEmail(String email) {
@@ -55,5 +56,13 @@ public class Contact  {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public double getIncome() {
+        return income;
+    }
+
+    public void setIncome(double income) {
+        this.income = income;
     }
 }

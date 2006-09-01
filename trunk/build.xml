@@ -5,7 +5,7 @@
     <!-- set global properties for this build -->
     <property name="src" location="src"/>
     <property name="lib" location="lib"/>
-    <property name="build" location="classes"/>
+    <property name="build" location="classes/production"/>
     <property name="dist" location="dist"/>
 
     <path id="class.path">

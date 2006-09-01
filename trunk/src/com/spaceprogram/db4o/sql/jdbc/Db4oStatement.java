@@ -4,10 +4,7 @@ import java.sql.*;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.spaceprogram.db4o.sql.SqlParser;
-import com.spaceprogram.db4o.sql.SqlStatement;
-import com.spaceprogram.db4o.sql.SqlQuery;
-import com.spaceprogram.db4o.sql.SqlToSoda;
+import com.spaceprogram.db4o.sql.*;
 import com.spaceprogram.db4o.sql.parser.SqlParseException;
 
 /**
@@ -55,7 +52,7 @@ public class Db4oStatement implements Statement {
     private List queryDB(SqlQuery q) throws SQLException {
         try {
             return SqlToSoda.execute(conn.getObjectContainer(), q);
-        } catch (ClassNotFoundException e) {
+        } catch (Sql4oException e) {
             throw new SQLException(e.getMessage());
         }
     }

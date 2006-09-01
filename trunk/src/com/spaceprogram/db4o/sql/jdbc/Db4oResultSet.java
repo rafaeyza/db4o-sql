@@ -1,5 +1,10 @@
 package com.spaceprogram.db4o.sql.jdbc;
 
+import com.db4o.reflect.ReflectClass;
+import com.spaceprogram.db4o.sql.ObjectSetWrapper;
+import com.spaceprogram.db4o.sql.Result;
+import com.spaceprogram.db4o.sql.Converter;
+
 import java.sql.*;
 import java.math.BigDecimal;
 import java.io.InputStream;
@@ -16,11 +21,12 @@ import java.lang.reflect.Field;
  * Time: 3:10:39 PM
  */
 public class Db4oResultSet implements ResultSet {
-    private List results;
+    private ObjectSetWrapper results;
     private int index = -1;
+    private boolean wasNull;
 
     public Db4oResultSet(List results) {
-        this.results = results;
+        this.results = (ObjectSetWrapper) results;
     }
 
     /**
@@ -76,7 +82,7 @@ public class Db4oResultSet implements ResultSet {
      * @throws java.sql.SQLException if a database access error occurs
      */
     public boolean wasNull() throws SQLException {
-        return false;
+        return wasNull;
     }
 
     /**
@@ -90,7 +96,20 @@ public class Db4oResultSet implements ResultSet {
      * @throws java.sql.SQLException if a database access error occurs
      */
     public String getString(int columnIndex) throws SQLException {
-        return null;
+        // get current object
+        Result result = getResult();
+        return (String) setWasNull(result.getObject(columnIndex));
+    }
+
+    private Result getResult() {
+        Result result = (Result) results.get(index);
+        return result;
+    }
+
+    private Object setWasNull(Object object) {
+        if(object == null) wasNull = true;
+        else wasNull = false;
+        return object;
     }
 
     /**
@@ -104,7 +123,9 @@ public class Db4oResultSet implements ResultSet {
      * @throws java.sql.SQLException if a database access error occurs
      */
     public boolean getBoolean(int columnIndex) throws SQLException {
-        return false;
+        Result result = getResult();
+        Boolean ret = Converter.convertToBoolean(setWasNull(result.getObject(columnIndex)));
+        return ret;
     }
 
     /**
@@ -362,23 +383,8 @@ public class Db4oResultSet implements ResultSet {
      */
     public String getString(String columnName) throws SQLException {
         // get current object
-        Object o = results.get(index);
-        // we'd have an Object[] here
-        // todo: might need to look at the ObjectSetWrapper to see what to expect here
-        // do getter
-        Class c = o.getClass();
-        //System.out.println("for class: " + c);
-        try {
-            Field field = c.getDeclaredField(columnName);
-            // todo: use getters if exist
-            field.setAccessible(true);
-            Object value = field.get(o);
-            return (String) value;
-        } catch (NoSuchFieldException e) {
-            throw new SQLException("No Such Field: " + columnName);
-        } catch (IllegalAccessException e) {
-            throw new SQLException("Cannot access field: " + columnName);
-        }
+        Result result = getResult();
+        return (String) result.getObject(columnName);
 
     }
 
