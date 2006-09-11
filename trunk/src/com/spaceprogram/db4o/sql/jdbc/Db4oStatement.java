@@ -51,7 +51,7 @@ public class Db4oStatement implements Statement {
 
     private List queryDB(SqlQuery q) throws SQLException {
         try {
-            return SqlToSoda.execute(conn.getObjectContainer(), q);
+            return SqlToSoda.execute(conn.getOc(), q);
         } catch (Sql4oException e) {
             throw new SQLException(e.getMessage());
         }
@@ -94,7 +94,7 @@ public class Db4oStatement implements Statement {
      * @throws java.sql.SQLException if a database access error occurs
      */
     public void close() throws SQLException {
-        conn.getObjectContainer().commit();
+        conn.getOc().commit();
     }
 
     /**

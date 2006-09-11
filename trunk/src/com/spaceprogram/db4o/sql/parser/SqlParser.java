@@ -289,7 +289,7 @@ public class SqlParser {
                             operator = matchResult.group();
                             //value = //checkForNextPieceAttached(s, matchResult, operator);
                             if (s2.length() > matchResult.end()) {
-                                value = s.substring(matchResult.end(), s.length());
+                                value = s2.substring(matchResult.end(), s2.length());
                             }
 
                         } else {
@@ -311,7 +311,7 @@ public class SqlParser {
                     }
                     // check if value was replaced
                     value = replaceValue(value);
-                    //      System.out.println("replaced with: " + value);
+                    // System.out.println("replaced with: " + value);
                     i += extraPiecesUsed;
 
                     if (field == null || field.length() < 1

@@ -25,6 +25,10 @@ public class ParserTest {
                 "from com.spaceprogram.db4o.Contact c where " +
                 "( age = 10 or age = 20 ) and " +
                 "income = 50000.02")
+                // todo: this query fails because the 100 is pushed up against the =
+                , new QueryString("FROM demo.objectmanager.model.Contact where age <= 2 and age >=100", "from demo.objectmanager.model.Contact where age <= 2 and age >= 100")
+                , new QueryString("FROM demo.objectmanager.model.Contact where age <= 2 and age>=100", "from demo.objectmanager.model.Contact where age <= 2 and age >= 100")
+                , new QueryString("FROM demo.objectmanager.model.Contact where age <= 2 and age>= 100", "from demo.objectmanager.model.Contact where age <= 2 and age >= 100")                
                };
         for (int i = 0; i < queryStringsToTest.length; i++) {
             QueryString s = queryStringsToTest[i];

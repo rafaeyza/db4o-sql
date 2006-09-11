@@ -17,6 +17,9 @@ public class WhereExpression implements Cloneable{
     public static final String OP_LESS_OR_EQUAL = "<=";
     public static final String AND = "AND";
     public static final String OR = "OR";
+    public static final String OP_NOT_EQUAL = "<>";
+    public static final String OP_NOT_EQUAL_2 = "!="; // why not
+
     
     private List<WhereExpression> expressions = new ArrayList<WhereExpression>();
     private String type = AND;

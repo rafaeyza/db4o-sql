@@ -13,6 +13,9 @@ import java.io.IOException;
  * Time: 5:40:08 PM
  */
 public class Db4oDriver implements Driver {
+    public static final int VERSION_MAJOR = 1;
+    public static final int VERSION_MINOR = 0;
+    private static final String DRIVER_NAME = "db4o JDBC Driver";
 
     static {
         try {
@@ -59,7 +62,7 @@ public class Db4oDriver implements Driver {
         } catch (IOException e) {
             throw new SQLException(e.getMessage());
         }
-        return new Db4oConnection(oc);
+        return new Db4oConnection(this, oc);
     }
 
     private void throwBadUrlException(String url) throws SQLException {
@@ -67,7 +70,6 @@ public class Db4oDriver implements Driver {
     }
 
     public boolean acceptsURL(String url) throws SQLException {
-        System.out.println("url: " + url);
         return url.contains("db4o");
     }
 
@@ -76,14 +78,22 @@ public class Db4oDriver implements Driver {
     }
 
     public int getMajorVersion() {
-        return 0;
+        return VERSION_MAJOR;
     }
 
     public int getMinorVersion() {
-        return 0;
+        return VERSION_MINOR;
     }
 
     public boolean jdbcCompliant() {
         return false;
+    }
+
+    public static String getVersion() {
+        return VERSION_MAJOR + "." + VERSION_MINOR;
+    }
+
+    public static String getDriverName() {
+        return DRIVER_NAME;
     }
 }
