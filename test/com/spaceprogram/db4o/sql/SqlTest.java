@@ -27,7 +27,6 @@ public class SqlTest extends ContactTest{
     /**
      * Will run a query for an object that is not in classpath.
      * Need to make GenericObjects here with no class on hand.
-     *
      */
     @Test
     public void testNoClass() throws Sql4oException, SqlParseException {
@@ -196,8 +195,7 @@ public class SqlTest extends ContactTest{
     @Test
     public void testIntegerCondition() throws SqlParseException, ClassNotFoundException, Sql4oException {
         String query = "from com.spaceprogram.db4o.Contact c where " +
-                " age = 10 or age = 20 "
-                ;
+                " age = 10 or age = 20 ";
 
         List<Result> results = Sql4o.execute(oc, query);
         TestUtils.displaySqlResults(results);
@@ -214,7 +212,6 @@ public class SqlTest extends ContactTest{
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 "age = 20 and " +
                 "income = 50000.02";
-                ;
 
         List<Result> results = Sql4o.execute(oc, query);
         TestUtils.displaySqlResults(results);
@@ -230,7 +227,6 @@ public class SqlTest extends ContactTest{
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 "(age = 10 or age = 20) and " +
                 "income = 50000.02";
-                ;
 
         List<Result> results = Sql4o.execute(oc, query);
         TestUtils.displaySqlResults(results);
@@ -244,7 +240,6 @@ public class SqlTest extends ContactTest{
     public void testLessThan() throws SqlParseException, ClassNotFoundException, Sql4oException {
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 "income < 50000.03";
-                ;
 
         List<Result> results = Sql4o.execute(oc, query);
         TestUtils.displaySqlResults(results);
@@ -255,7 +250,6 @@ public class SqlTest extends ContactTest{
     public void testLessThanOrEqual() throws SqlParseException, ClassNotFoundException, Sql4oException {
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 "income <= 50000.02";
-                ;
 
         List<Result> results = Sql4o.execute(oc, query);
         TestUtils.displaySqlResults(results);
@@ -266,7 +260,6 @@ public class SqlTest extends ContactTest{
     public void testLessThanOrEqual2() throws SqlParseException, ClassNotFoundException, Sql4oException {
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 "income <= 50000.01";
-                ;
 
         List<Result> results = Sql4o.execute(oc, query);
         TestUtils.displaySqlResults(results);
@@ -277,7 +270,6 @@ public class SqlTest extends ContactTest{
     public void testGreaterThan() throws SqlParseException, ClassNotFoundException, Sql4oException {
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 "income > 50000.03";
-                ;
 
         List<Result> results = Sql4o.execute(oc, query);
         TestUtils.displaySqlResults(results);
@@ -288,7 +280,6 @@ public class SqlTest extends ContactTest{
     public void testGreaterThanOrEqual() throws SqlParseException, ClassNotFoundException, Sql4oException {
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 "income >= 50000.02";
-                ;
 
         List<Result> results = Sql4o.execute(oc, query);
         TestUtils.displaySqlResults(results);
@@ -299,7 +290,6 @@ public class SqlTest extends ContactTest{
     public void testGreaterThanOrEqual2() throws SqlParseException, ClassNotFoundException, Sql4oException {
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 "income >= 50000.03";
-                ;
 
         List<Result> results = Sql4o.execute(oc, query);
         TestUtils.displaySqlResults(results);

@@ -158,6 +158,8 @@ public class SqlToSoda {
             WhereExpression where2 = (WhereExpression) where.clone();
             where2.setOperator(WhereExpression.OP_EQUALS);
             constraint.or(makeConstraint(reflectClass, dq, where2));
+        } else if (operator.equals(WhereExpression.OP_NOT_EQUAL) || operator.equals(WhereExpression.OP_NOT_EQUAL_2)) {
+            constraint.not();
         } else {
             constraint.equal(); // default
         }

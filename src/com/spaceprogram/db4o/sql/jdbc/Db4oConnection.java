@@ -1,6 +1,10 @@
 package com.spaceprogram.db4o.sql.jdbc;
 
 import com.db4o.ObjectContainer;
+import com.spaceprogram.db4o.sql.SqlParser;
+import com.spaceprogram.db4o.sql.SqlStatement;
+import com.spaceprogram.db4o.sql.metadata.Db4oDatabaseMetaData;
+import com.spaceprogram.db4o.sql.parser.SqlParseException;
 
 import java.sql.*;
 import java.util.Map;
@@ -12,220 +16,62 @@ import java.util.Properties;
  * Time: 5:54:27 PM
  */
 public class Db4oConnection implements Connection {
-    private ObjectContainer objectContainer;
+    private Db4oDriver driver;
+    private ObjectContainer oc;
 
-    public Db4oConnection(ObjectContainer objectContainer) {
-        this.objectContainer = objectContainer;
+    public Db4oConnection(Db4oDriver driver, ObjectContainer objectContainer) {
+        this.driver = driver;
+        this.oc = objectContainer;
     }
 
-    /**
-     * Creates a <code>Statement</code> object for sending
-     * SQL statements to the database.
-     * SQL statements without parameters are normally
-     * executed using <code>Statement</code> objects. If the same SQL statement
-     * is executed many times, it may be more efficient to use a
-     * <code>PreparedStatement</code> object.
-     * <p/>
-     * Result sets created using the returned <code>Statement</code>
-     * object will by default be type <code>TYPE_FORWARD_ONLY</code>
-     * and have a concurrency level of <code>CONCUR_READ_ONLY</code>.
-     *
-     * @return a new default <code>Statement</code> object
-     * @throws java.sql.SQLException if a database access error occurs
-     */
+    public ObjectContainer getObjectContainer(){
+        return oc;
+    }
+
     public Statement createStatement() throws SQLException {
         return new Db4oStatement(this);
     }
-
-    /**
-     * Creates a <code>PreparedStatement</code> object for sending
-     * parameterized SQL statements to the database.
-     * <p/>
-     * A SQL statement with or without IN parameters can be
-     * pre-compiled and stored in a <code>PreparedStatement</code> object. This
-     * object can then be used to efficiently execute this statement
-     * multiple times.
-     * <p/>
-     * <P><B>Note:</B> This method is optimized for handling
-     * parametric SQL statements that benefit from precompilation. If
-     * the driver supports precompilation,
-     * the method <code>prepareStatement</code> will send
-     * the statement to the database for precompilation. Some drivers
-     * may not support precompilation. In this case, the statement may
-     * not be sent to the database until the <code>PreparedStatement</code>
-     * object is executed.  This has no direct effect on users; however, it does
-     * affect which methods throw certain <code>SQLException</code> objects.
-     * <p/>
-     * Result sets created using the returned <code>PreparedStatement</code>
-     * object will by default be type <code>TYPE_FORWARD_ONLY</code>
-     * and have a concurrency level of <code>CONCUR_READ_ONLY</code>.
-     *
-     * @param sql an SQL statement that may contain one or more '?' IN
-     *            parameter placeholders
-     * @return a new default <code>PreparedStatement</code> object containing the
-     *         pre-compiled SQL statement
-     * @throws java.sql.SQLException if a database access error occurs
-     */
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         return null;
     }
 
-    /**
-     * Creates a <code>CallableStatement</code> object for calling
-     * database stored procedures.
-     * The <code>CallableStatement</code> object provides
-     * methods for setting up its IN and OUT parameters, and
-     * methods for executing the call to a stored procedure.
-     * <p/>
-     * <P><B>Note:</B> This method is optimized for handling stored
-     * procedure call statements. Some drivers may send the call
-     * statement to the database when the method <code>prepareCall</code>
-     * is done; others
-     * may wait until the <code>CallableStatement</code> object
-     * is executed. This has no
-     * direct effect on users; however, it does affect which method
-     * throws certain SQLExceptions.
-     * <p/>
-     * Result sets created using the returned <code>CallableStatement</code>
-     * object will by default be type <code>TYPE_FORWARD_ONLY</code>
-     * and have a concurrency level of <code>CONCUR_READ_ONLY</code>.
-     *
-     * @param sql an SQL statement that may contain one or more '?'
-     *            parameter placeholders. Typically this  statement is a JDBC
-     *            function call escape string.
-     * @return a new default <code>CallableStatement</code> object containing the
-     *         pre-compiled SQL statement
-     * @throws java.sql.SQLException if a database access error occurs
-     */
     public CallableStatement prepareCall(String sql) throws SQLException {
         return null;
     }
 
-    /**
-     * Converts the given SQL statement into the system's native SQL grammar.
-     * A driver may convert the JDBC SQL grammar into its system's
-     * native SQL grammar prior to sending it. This method returns the
-     * native form of the statement that the driver would have sent.
-     *
-     * @param sql an SQL statement that may contain one or more '?'
-     *            parameter placeholders
-     * @return the native form of this statement
-     * @throws java.sql.SQLException if a database access error occurs
-     */
     public String nativeSQL(String sql) throws SQLException {
-        return null;
+        SqlStatement statement = null;
+        try {
+            statement = SqlParser.parse(sql);
+        } catch (SqlParseException e) {
+            e.printStackTrace();
+            throw new SQLException("Parse exception: " + e.getMessage());
+        }
+        return statement.toSQLString();
     }
 
-    /**
-     * Sets this connection's auto-commit mode to the given state.
-     * If a connection is in auto-commit mode, then all its SQL
-     * statements will be executed and committed as individual
-     * transactions.  Otherwise, its SQL statements are grouped into
-     * transactions that are terminated by a call to either
-     * the method <code>commit</code> or the method <code>rollback</code>.
-     * By default, new connections are in auto-commit
-     * mode.
-     * <p/>
-     * The commit occurs when the statement completes or the next
-     * execute occurs, whichever comes first. In the case of
-     * statements returning a <code>ResultSet</code> object,
-     * the statement completes when the last row of the
-     * <code>ResultSet</code> object has been retrieved or the
-     * <code>ResultSet</code> object has been closed. In advanced cases, a single
-     * statement may return multiple results as well as output
-     * parameter values. In these cases, the commit occurs when all results and
-     * output parameter values have been retrieved.
-     * <p/>
-     * <B>NOTE:</B>  If this method is called during a transaction, the
-     * transaction is committed.
-     *
-     * @param autoCommit <code>true</code> to enable auto-commit mode;
-     *                   <code>false</code> to disable it
-     * @throws java.sql.SQLException if a database access error occurs
-     * @see #getAutoCommit
-     */
     public void setAutoCommit(boolean autoCommit) throws SQLException {
 
     }
 
-    /**
-     * Retrieves the current auto-commit mode for this <code>Connection</code>
-     * object.
-     *
-     * @return the current state of this <code>Connection</code> object's
-     *         auto-commit mode
-     * @throws java.sql.SQLException if a database access error occurs
-     * @see #setAutoCommit
-     */
     public boolean getAutoCommit() throws SQLException {
         return false;
     }
 
-    /**
-     * Makes all changes made since the previous
-     * commit/rollback permanent and releases any database locks
-     * currently held by this <code>Connection</code> object.
-     * This method should be
-     * used only when auto-commit mode has been disabled.
-     *
-     * @throws java.sql.SQLException if a database access error occurs or this
-     *                               <code>Connection</code> object is in auto-commit mode
-     * @see #setAutoCommit
-     */
     public void commit() throws SQLException {
-
+        oc.commit();
     }
 
-    /**
-     * Undoes all changes made in the current transaction
-     * and releases any database locks currently held
-     * by this <code>Connection</code> object. This method should be
-     * used only when auto-commit mode has been disabled.
-     *
-     * @throws java.sql.SQLException if a database access error occurs or this
-     *                               <code>Connection</code> object is in auto-commit mode
-     * @see #setAutoCommit
-     */
     public void rollback() throws SQLException {
-
+        oc.rollback();
     }
 
-    /**
-     * Releases this <code>Connection</code> object's database and JDBC resources
-     * immediately instead of waiting for them to be automatically released.
-     * <p/>
-     * Calling the method <code>close</code> on a <code>Connection</code>
-     * object that is already closed is a no-op.
-     * <p/>
-     * <B>Note:</B> A <code>Connection</code> object is automatically
-     * closed when it is garbage collected. Certain fatal errors also
-     * close a <code>Connection</code> object.
-     *
-     * @throws java.sql.SQLException if a database access error occurs
-     */
     public void close() throws SQLException {
-        objectContainer.close();
+        oc.close();
     }
 
-    /**
-     * Retrieves whether this <code>Connection</code> object has been
-     * closed.  A connection is closed if the method <code>close</code>
-     * has been called on it or if certain fatal errors have occurred.
-     * This method is guaranteed to return <code>true</code> only when
-     * it is called after the method <code>Connection.close</code> has
-     * been called.
-     * <p/>
-     * This method generally cannot be called to determine whether a
-     * connection to a database is valid or invalid.  A typical client
-     * can determine that a connection is invalid by catching any
-     * exceptions that might be thrown when an operation is attempted.
-     *
-     * @return <code>true</code> if this <code>Connection</code> object
-     *         is closed; <code>false</code> if it is still open
-     * @throws java.sql.SQLException if a database access error occurs
-     */
     public boolean isClosed() throws SQLException {
-        return false;
+        return oc.ext().isClosed();
     }
 
     /**
@@ -241,7 +87,7 @@ public class Db4oConnection implements Connection {
      * @throws java.sql.SQLException if a database access error occurs
      */
     public DatabaseMetaData getMetaData() throws SQLException {
-        return null;
+        return new Db4oDatabaseMetaData(driver, this);
     }
 
     /**
@@ -859,8 +705,8 @@ public class Db4oConnection implements Connection {
         return null;
     }
 
-    ObjectContainer getObjectContainer() {
-        return objectContainer;
+    ObjectContainer getOc() {
+        return oc;
     }
 
     public <T> T unwrap(Class<T> iface) throws SQLException {

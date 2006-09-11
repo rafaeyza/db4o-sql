@@ -50,8 +50,6 @@ public class DbUtil {
         }
         if (objectServer == null) {
             objectServer = getObjectServerForFilename(name + DB_FILE_SUFFIX, port);
-            // and give access
-            //objectServer.grantAccess(USER, PASSWORD);
         }
         return objectServer;
     }
