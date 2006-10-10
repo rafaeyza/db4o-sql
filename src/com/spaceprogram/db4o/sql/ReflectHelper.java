@@ -19,6 +19,11 @@ import java.text.Collator;
  */
 public class ReflectHelper {
 
+    /**
+     *
+     * @param container
+     * @return list of ReflectClass objects that have been stored in database
+     */
     public static List getUserStoredClasses(ObjectContainer container) {
         String[] ignore = new String[]{
                 // todo: decide which should be filtered for sure

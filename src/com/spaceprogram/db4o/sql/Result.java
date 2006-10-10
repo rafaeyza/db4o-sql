@@ -13,14 +13,14 @@ public interface Result {
      * @param fieldIndex the field index within the object or the select expression
      * @return the field value for the field in the object at this index.
      */
-    Object getObject(int fieldIndex);
+    Object getObject(int fieldIndex) throws Sql4oException;
 
     /**
      *
      * @param fieldName the name of the field in the object
      * @return the field value for the object with specified field name
      */
-    Object getObject(String fieldName);
+    Object getObject(String fieldName) throws Sql4oException;
 
     /**
      *

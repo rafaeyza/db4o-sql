@@ -17,7 +17,7 @@ import java.util.regex.MatchResult;
  * Time: 6:05:54 PM
  */
 public class SqlParser {
-    private static String REGEX_QUOTED_STRING = "'[\\w\\s]*'";
+    private static String REGEX_QUOTED_STRING = "'[^']*'"; //"'[^'.]*'"; // "'.*'"; // "'[\\w\\s]*'"; - 
     public static final String REGEX_OPERATORS = "<=|>=|<>|=|<|>";
 
     private Builder[] builders = {
@@ -39,6 +39,7 @@ public class SqlParser {
     private SqlStatement doParse() throws SqlParseException {
         // what to do for quoted strings that might have spaces in them??? hmmm, how about taking those out right now and replacing them with tokens
         query = replaceQuotedStrings(query);
+        //  System.out.println("query: " + query);
 
         String[] split = query.trim().split("\\s+"); // split by white space
         // preliminary checks
@@ -63,10 +64,11 @@ public class SqlParser {
         boolean found = false;
         int i = 0;
         while (matcher.find()) {
-//            System.out.println("I found the text \"" + matcher.group() +
-//                    "\" starting at index " + matcher.start() +
-//                    " and ending at index " + matcher.end() + ".");
-            // swap the string out with a token
+            /*System.out.println("found text \"" + matcher.group() +
+                    "\" starting at index " + matcher.start() +
+                    " and ending at index " + matcher.end() + ".");
+            */
+            //swap the string out with a token
             quotedStrings.add(matcher.group());
             buff.replace(matcher.start(), matcher.end(), "{" + i + "}");
             matcher.reset(); // todo: could optimize this
@@ -118,7 +120,7 @@ public class SqlParser {
     }
 
 
-    private String replaceValue(String value) {
+    private String replaceQuotedValue(String value) {
         if (value.startsWith("{") && value.endsWith("}")) {
             int replacementIndex = Integer.parseInt(value.substring(1, value.length() - 1));
             return quotedStrings.get(replacementIndex);
@@ -153,7 +155,7 @@ public class SqlParser {
         }
     }
 
-    static class FromBuilder implements Builder {
+    class FromBuilder implements Builder {
         final String keyword = "FROM";
 
         public String getKeyword() {
@@ -171,24 +173,24 @@ public class SqlParser {
                     continue;
                 }
                 if (s.endsWith(",")) { // then just classname
-                    from.addClass(s.substring(0, s.length() - 1));
+                    from.addClass(stripQuotes(replaceQuotedValue(s.substring(0, s.length() - 1))));
                     continue;
                 }
                 if (i == expr.size() - 1) {
-                    from.addClass(s);
+                    from.addClass(stripQuotes(replaceQuotedValue(s)));
                     continue;
                 }
                 if (expr.size() > i + 1) {
                     String s2 = expr.get(i + 1);
                     if (s2.equals(",")) {
                         // then just classname as well
-                        from.addClass(s);
+                        from.addClass(stripQuotes(replaceQuotedValue(s)));
                     } else {
                         // must be an alias
                         if (s2.endsWith(",")) {
                             s2 = s2.substring(0, s2.length());
                         } // else just ignore, commas alone are just thrown out on next loop
-                        from.addClass(s, s2);
+                        from.addClass(stripQuotes(replaceQuotedValue(s)), s2);
                     }
                     i++;
                 }
@@ -197,6 +199,10 @@ public class SqlParser {
             sq.setFrom(from);
 
         }
+    }
+
+    private String stripQuotes(String s) {
+        return s; //s.replaceAll("'", "");
     }
 
     class WhereBuilder implements Builder {
@@ -239,12 +245,10 @@ public class SqlParser {
                         expressionSplit.add(i + 1, token);
                     }
                     i++;
-                    //      System.out.println("Making sub expr");
                     WhereExpression sub = new WhereExpression();
                     root.add(sub);
                     i = buildExpr(sub, expressionSplit, i);
                 } else if (s.equals(")")) {
-                    //System.out.println("found end token");
                     return i;
 
                 } else if (s.equalsIgnoreCase(WhereExpression.AND)) {
@@ -276,6 +280,9 @@ public class SqlParser {
                     } else {
                         field = s;
                         // check next piece
+                        if(expressionSplit.size() <= i + 1){
+                            throw new SqlParseException("Invalid where expression.");
+                        }
                         String s2 = expressionSplit.get(i + 1);
                         //System.out.println("s2=" + s2);
                         Matcher matcher2 = pattern.matcher(s2);
@@ -301,7 +308,6 @@ public class SqlParser {
                         // must be next piece
                         // todo: check for list size before this and the same above
                         value = expressionSplit.get(i + extraPiecesUsed + 1);
-                        //          System.out.println("value here: " + value);
                         extraPiecesUsed++;
                     }
                     //System.out.println("full expression found: " + field + "," + operator + "," + value);
@@ -310,7 +316,7 @@ public class SqlParser {
                         expressionSplit.add(i + extraPiecesUsed + 1, ")");
                     }
                     // check if value was replaced
-                    value = replaceValue(value);
+                    value = replaceQuotedValue(value);
                     // System.out.println("replaced with: " + value);
                     i += extraPiecesUsed;
 

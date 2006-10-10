@@ -29,14 +29,19 @@ public class SqlToSoda {
         for (int i = 0; i < q.getFrom().getClassRefs().size(); i++) {
             ClassRef classRef = q.getFrom().getClassRefs().get(i);
             String className = classRef.getClassName();
-            //Class c = Class.forName(className);
+
+            // if .NET query, might be surrouned by quotes, eg: FROM 'Quizlet.Question, Quizlet.Framework'
+            className = className.replaceAll("'", "");
+
             // Class may not be on classpath, so lets use the generic reflector
             ReflectClass reflectClass = oc.ext().reflector().forName(className);
             if (reflectClass == null) {
-                throw new Sql4oException("Class not stored.");
+                throw new Sql4oException("Class not stored: " + className);
             }
             query.constrain(reflectClass);
             // todo: where should we restrict to one class?  Or allow joins??
+
+            verifySelectFields(reflectClass, q);
 
             // todo: apply value based where conditions to specific classes, join conditions can then be done after
             if (q.getWhere() != null) {
@@ -52,16 +57,37 @@ public class SqlToSoda {
         ObjectSet results = query.execute();
         ObjectSetWrapper resultWrapper = new ObjectSetWrapper(oc);
         resultWrapper.setObjectSet(results);
-        if (q.getSelect() != null && q.getSelect().getFields() != null) {
-            /*
-            This isn't needed anymore
-            for (int i = 0; i < q.getSelect().getFields().size(); i++) {
-                String field = q.getSelect().getFields().get(i);
-                //System.out.println("select: " + field);
-            }*/
+        if (q.getSelect() != null) {
             resultWrapper.setSelectFields(q.getSelect().getFields());
         }
         return resultWrapper;
+    }
+
+    private static void verifySelectFields(ReflectClass reflectClass, SqlQuery q) throws Sql4oException {
+        if (q.getSelect() != null) {
+            List<String> selFields = q.getSelect().getFields();
+            if (selFields != null) {
+                // check for asterisk
+                if (selFields.size() == 1 && selFields.get(0).equals("*")) {
+                    return;
+                }
+                ReflectField[] fields = ReflectHelper.getDeclaredFields(reflectClass);
+                for (int i = 0; i < selFields.size(); i++) {
+                    String field = selFields.get(i);
+                    boolean fieldOk = false;
+                    for (int j = 0; j < fields.length; j++) {
+                        ReflectField reflectField = fields[j];
+                        if (reflectField.getName().equals(field)) {
+                            fieldOk = true;
+                            break;
+                        }
+                    }
+                    if (!fieldOk) {
+                        throw new Sql4oException("Field not found: " + field);
+                    }
+                }
+            }
+        }
     }
 
 

@@ -19,12 +19,12 @@ public class ObjectWrapper implements Result {
         this.ob = ob;
     }
 
-    public Object getObject(int fieldIndex) {
+    public Object getObject(int fieldIndex) throws Sql4oException {
         ReflectField f = objectSetWrapper.getFieldForColumn(ob, fieldIndex);
         return getFieldValue(f, ob);
     }
 
-    public Object getObject(String fieldName) {
+    public Object getObject(String fieldName) throws Sql4oException {
         ReflectField f = objectSetWrapper.getFieldForColumn(ob, fieldName);
         return getFieldValue(f, ob);
     }

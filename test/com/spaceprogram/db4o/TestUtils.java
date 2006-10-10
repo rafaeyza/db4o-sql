@@ -5,6 +5,7 @@ import com.db4o.query.Query;
 import com.spaceprogram.db4o.util.ObjectContainerUtils;
 import com.spaceprogram.db4o.sql.Result;
 import com.spaceprogram.db4o.sql.ObjectSetWrapper;
+import com.spaceprogram.db4o.sql.Sql4oException;
 
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class TestUtils {
         return ObjectContainerUtils.clear(oc);
     }
 
-    public static void displaySqlResults(List<Result> results) {
+    public static void displaySqlResults(List<Result> results) throws Sql4oException {
         int columnCount = ((ObjectSetWrapper)results).getMetaData().getColumnCount();
         for (Result result : results) {
             System.out.print("Got: " + result.getBaseObject(0) + " : ");
@@ -54,7 +55,7 @@ public class TestUtils {
         }
     }
 
-    public static void displaySqlResult(Result result, int columnCount) {
+    public static void displaySqlResult(Result result, int columnCount) throws Sql4oException {
         for (int i = 0; i < columnCount; i++) {
             Object o = result.getObject(i);
             System.out.print("field" + i + "=" + o + " ");
