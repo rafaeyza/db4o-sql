@@ -52,7 +52,7 @@ public class ObjectSetWrapper implements ObjectSet {
      * @param columnIndex
      * @return
      */
-    public ReflectField getFieldForColumn(Object ob, int columnIndex) {
+    public ReflectField getFieldForColumn(Object ob, int columnIndex) throws Sql4oException {
         ReflectClass reflectClass = oc.ext().reflector().forObject(ob);
         if (hasSelectFields() && selectFields.size() > columnIndex) {
             return getField(reflectClass, selectFields.get(columnIndex));
@@ -61,14 +61,12 @@ public class ObjectSetWrapper implements ObjectSet {
         }
     }
 
-    public ReflectField getFieldForColumn(Object ob, String fieldName) {
+    public ReflectField getFieldForColumn(Object ob, String fieldName) throws Sql4oException {
         if (hasSelectFields() && !selectFields.contains(fieldName)) {
-            throw new Sql4oRuntimeException("Field not found in select list: " + fieldName);
+            throw new Sql4oRuntimeException("Field not found: " + fieldName);
         }
         ReflectClass reflectClass = oc.ext().reflector().forObject(ob);
         return getField(reflectClass, fieldName);
-
-
     }
 
     private ReflectField getField(ReflectClass aClass, int columnIndex) {
@@ -86,10 +84,14 @@ public class ObjectSetWrapper implements ObjectSet {
 
 
 
-    private ReflectField getField(ReflectClass aClass, String fieldName) {
+    private ReflectField getField(ReflectClass aClass, String fieldName) throws Sql4oException {
         // todo: check for generic object here and try to use that GenericObject genericObject =
         ReflectField field = aClass.getDeclaredField(fieldName);
+        if(field == null){
+            throw new Sql4oException("Field " + fieldName + " does not exist.");
+        }
         field.setAccessible();
+
         return field;
     }
 
@@ -305,7 +307,7 @@ public class ObjectSetWrapper implements ObjectSet {
         this.nextResult = nextResult;
     }
 
-    public List getSelectFields() {
+    public List<String> getSelectFields() {
         return selectFields;
     }
 

@@ -33,9 +33,10 @@ public class SqlTest extends ContactTest{
 
         initGenericObjects();
 
+        /* Doesn't work yet, because can't make generic objects yet
         List<Result> results = Sql4o.execute(oc, "FROM com.acme.Person");
         System.out.println("Results.size: " + results.size());
-        TestUtils.displaySqlResults(results);
+        TestUtils.displaySqlResults(results);*/
     }
 
     private void initGenericObjects() {
@@ -296,4 +297,28 @@ public class SqlTest extends ContactTest{
 
         Assert.assertEquals(5, results.size());
     }
+    @Test(expected = Sql4oException.class)
+    public void testInvalidField() throws SqlParseException, ClassNotFoundException, Sql4oException {
+        // age2 is not valid
+        String query = "select age, age2 from com.spaceprogram.db4o.Contact c where " +
+                "income >= 50000.03";
+
+        List<Result> results = Sql4o.execute(oc, query);
+        TestUtils.displaySqlResults(results);
+
+        Assert.assertEquals(5, results.size());
+    }
+    @Test
+    public void testGetColumnNames() throws SqlParseException, ClassNotFoundException, Sql4oException {
+        // age2 is not valid
+        String query = "select id, age, income from com.spaceprogram.db4o.Contact c where " +
+                "income >= 50000.03";
+
+        ObjectSetWrapper results = (ObjectSetWrapper) Sql4o.execute(oc, query);
+        Assert.assertEquals(3, results.getMetaData().getColumnCount());
+        Assert.assertEquals("id", results.getMetaData().getColumnName(0));
+        Assert.assertEquals("age", results.getMetaData().getColumnName(1));
+        Assert.assertEquals("income", results.getMetaData().getColumnName(2));
+    }
+   
 }

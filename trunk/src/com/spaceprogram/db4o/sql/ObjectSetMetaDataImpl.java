@@ -5,6 +5,9 @@ import com.db4o.ObjectContainer;
 import com.db4o.reflect.ReflectClass;
 import com.db4o.reflect.ReflectField;
 
+import java.util.List;
+import java.util.ArrayList;
+
 /**
  * User: treeder
  * Date: Aug 20, 2006
@@ -13,6 +16,8 @@ import com.db4o.reflect.ReflectField;
 public class ObjectSetMetaDataImpl implements ObjectSetMetaData {
     private int columnCount;
     private ReflectClass reflectClass;
+    private List<String> fields;
+
 
     public ObjectSetMetaDataImpl(ObjectSet results, ObjectSetWrapper objectSetWrapper, ObjectContainer oc) {
         init(results, objectSetWrapper, oc);
@@ -34,9 +39,16 @@ public class ObjectSetMetaDataImpl implements ObjectSetMetaData {
     private void init(Object lastResult, ObjectSetWrapper objectSetWrapper, ObjectContainer oc) {
         reflectClass = oc.ext().reflector().forObject(lastResult);
         if (objectSetWrapper.hasSelectFields()) {
-            columnCount = objectSetWrapper.getSelectFields().size();
+            fields = objectSetWrapper.getSelectFields();
+            columnCount = fields.size();
         } else {
-            columnCount = getDeclaredFields().length;
+            fields = new ArrayList<String>();
+            ReflectField[] reflectFields = getDeclaredFields();
+            for (int i = 0; i < reflectFields.length; i++) {
+                ReflectField reflectField = reflectFields[i];
+                fields.add(reflectField.getName());
+            }
+            columnCount = fields.size();
         }
     }
 
@@ -50,7 +62,10 @@ public class ObjectSetMetaDataImpl implements ObjectSetMetaData {
     }
 
     public String getColumnName(int column) {
-        return ReflectHelper.getDeclaredFields(reflectClass)[column].getName();
+        if(column >= 0 && column < fields.size()){
+            return fields.get(column);
+        }
+        return null;
     }
 
 

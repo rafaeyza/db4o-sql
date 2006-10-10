@@ -40,6 +40,7 @@ public abstract class ContactTest {
 
     @AfterClass
     public static void tearDownAfter() {
+        System.out.println("tearDownAfter");
         // remove contacts
         System.out.println("Removing contacts");
         ObjectContainer oc = server.openClient();
@@ -52,11 +53,14 @@ public abstract class ContactTest {
 
     @Before
     public void beforeEach() {
+        System.out.println("beforeEach");
+        // opening and closing for each test doesn't work, not sure why
         oc = server.openClient();
     }
 
     @After
     public void afterEach() {
+        System.out.println("afterEach");
         oc.close();
     }
 

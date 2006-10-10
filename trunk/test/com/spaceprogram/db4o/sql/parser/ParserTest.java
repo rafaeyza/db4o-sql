@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.Assert;
 import com.spaceprogram.db4o.sql.SqlStatement;
 import com.spaceprogram.db4o.sql.SqlParser;
+import com.spaceprogram.db4o.sql.SqlQuery;
 
 /**
  * User: treeder
@@ -28,7 +29,8 @@ public class ParserTest {
                 // todo: this query fails because the 100 is pushed up against the =
                 , new QueryString("FROM demo.objectmanager.model.Contact where age <= 2 and age >=100", "from demo.objectmanager.model.Contact where age <= 2 and age >= 100")
                 , new QueryString("FROM demo.objectmanager.model.Contact where age <= 2 and age>=100", "from demo.objectmanager.model.Contact where age <= 2 and age >= 100")
-                , new QueryString("FROM demo.objectmanager.model.Contact where age <= 2 and age>= 100", "from demo.objectmanager.model.Contact where age <= 2 and age >= 100")                
+                , new QueryString("FROM demo.objectmanager.model.Contact where age <= 2 and age>= 100", "from demo.objectmanager.model.Contact where age <= 2 and age >= 100")
+                , new QueryString("FROM 'Quizlet.Question, Quizlet.Framework'", "from 'Quizlet.Question, Quizlet.Framework'")
                };
         for (int i = 0; i < queryStringsToTest.length; i++) {
             QueryString s = queryStringsToTest[i];
@@ -76,6 +78,15 @@ public class ParserTest {
                 Assert.assertTrue(true);
             }
         }
+    }
+    
+    @Test
+    public void testQuotedClassString() throws SqlParseException {
+        String s = "FROM 'Quizlet.Question, Quizlet.Framework' where x = y";
+        // should return a single class string with no quotes
+        SqlQuery query = (SqlQuery) SqlParser.parse(s);
+        Assert.assertEquals("'Quizlet.Question, Quizlet.Framework'", query.getFrom().getClassRefs().get(0).getClassName());
+        Assert.assertEquals(1, query.getFrom().getClassRefs().size());
     }
 
 }

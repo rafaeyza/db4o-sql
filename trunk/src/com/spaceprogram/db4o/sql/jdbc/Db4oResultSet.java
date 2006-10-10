@@ -4,6 +4,7 @@ import com.db4o.reflect.ReflectClass;
 import com.spaceprogram.db4o.sql.ObjectSetWrapper;
 import com.spaceprogram.db4o.sql.Result;
 import com.spaceprogram.db4o.sql.Converter;
+import com.spaceprogram.db4o.sql.Sql4oException;
 
 import java.sql.*;
 import java.math.BigDecimal;
@@ -98,7 +99,11 @@ public class Db4oResultSet implements ResultSet {
     public String getString(int columnIndex) throws SQLException {
         // get current object
         Result result = getResult();
-        return (String) setWasNull(result.getObject(columnIndex));
+        try {
+            return (String) setWasNull(result.getObject(columnIndex));
+        } catch (Sql4oException e) {
+            throw new SQLException(e.getMessage());
+        }
     }
 
     private Result getResult() {
@@ -124,7 +129,12 @@ public class Db4oResultSet implements ResultSet {
      */
     public boolean getBoolean(int columnIndex) throws SQLException {
         Result result = getResult();
-        Boolean ret = Converter.convertToBoolean(setWasNull(result.getObject(columnIndex)));
+        Boolean ret = null;
+        try {
+            ret = Converter.convertToBoolean(setWasNull(result.getObject(columnIndex)));
+        } catch (Sql4oException e) {
+            throw new SQLException(e.getMessage());
+        }
         return ret;
     }
 
@@ -384,7 +394,11 @@ public class Db4oResultSet implements ResultSet {
     public String getString(String columnName) throws SQLException {
         // get current object
         Result result = getResult();
-        return (String) result.getObject(columnName);
+        try {
+            return (String) result.getObject(columnName);
+        } catch (Sql4oException e) {
+            throw new SQLException(e.getMessage());
+        }
 
     }
 

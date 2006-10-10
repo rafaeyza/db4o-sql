@@ -72,6 +72,7 @@ public class DbUtil {
         // other options
         Db4o.configure().exceptionsOnNotStorable(true);
         Db4o.configure().objectClass("java.math.BigDecimal").translate(new com.db4o.config.TSerializable());
+        Db4o.configure().allowVersionUpdates(true);
 
         // now open server
         ObjectServer objectServer = Db4o.openServer(dbfile.getPath(), port);
