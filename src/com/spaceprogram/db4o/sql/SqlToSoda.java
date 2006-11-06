@@ -148,10 +148,8 @@ public class SqlToSoda {
 
     private static Object convertStringToObjectValue(Class c, WhereExpression where) throws Sql4oException {
         Object val = null;
-
-		System.out.println("Class " + c);
+		//System.out.println("Class " + c);
 		if (c.isPrimitive()) {
-            //System.out.println("is primitive " + c);
             if (c.isAssignableFrom(Integer.TYPE)) {
                 val = new Integer(where.getValue());
             } else if (c.isAssignableFrom(Long.TYPE)) {
