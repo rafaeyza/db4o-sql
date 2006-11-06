@@ -1,5 +1,7 @@
 package com.spaceprogram.db4o;
 
+import java.util.Date;
+
 
 /**
  * User: Travis Reeder
@@ -13,8 +15,12 @@ public class Contact  {
     private int age;
     private String category;
     private double income;
+	private Date birthDate;
 
-    public Integer getId() {
+	private Long longField;
+	private Double doubleField;
+
+	public Integer getId() {
         return id;
     }
 
@@ -65,4 +71,28 @@ public class Contact  {
     public void setIncome(double income) {
         this.income = income;
     }
+
+	public Date getBirthDate() {
+		return birthDate;
+	}
+
+	public void setBirthDate(Date birthDate) {
+		this.birthDate = birthDate;
+	}
+
+	public Long getLongField() {
+		return longField;
+	}
+
+	public void setLongField(Long longField) {
+		this.longField = longField;
+	}
+
+	public Double getDoubleField() {
+		return doubleField;
+	}
+
+	public void setDoubleField(Double doubleField) {
+		this.doubleField = doubleField;
+	}
 }

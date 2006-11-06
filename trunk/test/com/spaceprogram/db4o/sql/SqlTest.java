@@ -16,6 +16,7 @@ import org.junit.*;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Date;
+import java.util.Calendar;
 
 /**
  * User: treeder
@@ -194,7 +195,7 @@ public class SqlTest extends ContactTest{
         Assert.assertEquals(20, result.getObject("age"));
     }
     @Test
-    public void testIntegerCondition() throws SqlParseException, ClassNotFoundException, Sql4oException {
+    public void testIntCondition() throws SqlParseException, ClassNotFoundException, Sql4oException {
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 " age = 10 or age = 20 ";
 
@@ -208,7 +209,36 @@ public class SqlTest extends ContactTest{
 
         Assert.assertEquals(20, result.getObject("age"));
     }
-    @Test
+	@Test
+    public void testIntegerCondition() throws SqlParseException, ClassNotFoundException, Sql4oException {
+        String query = "from com.spaceprogram.db4o.Contact c where " +
+                " id = 1 ";
+
+        List<Result> results = Sql4o.execute(oc, query);
+        TestUtils.displaySqlResults(results);
+
+        Assert.assertEquals(1, results.size());
+
+        Result result = results.get(0);
+        Assert.assertEquals("contact 1", result.getObject("name"));
+
+        Assert.assertEquals(new Integer(1), result.getObject("id"));
+    }
+	@Test
+    public void testLongCondition() throws SqlParseException, ClassNotFoundException, Sql4oException {
+        String query = "from com.spaceprogram.db4o.Contact c where " +
+                " longField = 1 ";
+
+        List<Result> results = Sql4o.execute(oc, query);
+        TestUtils.displaySqlResults(results);
+
+        Assert.assertEquals(1, results.size());
+
+        Result result = results.get(0);
+
+        Assert.assertEquals(new Long(1), result.getObject("longField"));
+    }
+	@Test
     public void testDoubleCondition() throws SqlParseException, ClassNotFoundException, Sql4oException {
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 "age = 20 and " +
@@ -223,7 +253,38 @@ public class SqlTest extends ContactTest{
         Assert.assertEquals("contact 2", result.getObject("name"));
         Assert.assertEquals(50000.02, result.getObject("income"));
     }
-    @Test
+	@Test
+    public void testDateCondition() throws SqlParseException, ClassNotFoundException, Sql4oException {
+		int numDays = 6;
+		Calendar cal = Calendar.getInstance();
+		cal.add(Calendar.DAY_OF_YEAR, -numDays);
+
+		String query = "from com.spaceprogram.db4o.Contact c where " +
+                "birthDate > '" + SqlToSoda.df.format(cal.getTime()) + "' ";
+		System.out.println("query: " + query);
+
+		List<Result> results = Sql4o.execute(oc, query);
+        TestUtils.displaySqlResults(results);
+
+        Assert.assertEquals(numDays + 1, results.size());
+
+    }
+	@Test
+    public void testDoubleCondition2() throws SqlParseException, ClassNotFoundException, Sql4oException {
+        String query = "from com.spaceprogram.db4o.Contact c where " +
+                "age = 20 and " +
+                "doubleField = 50000.02";
+
+        List<Result> results = Sql4o.execute(oc, query);
+        TestUtils.displaySqlResults(results);
+
+        Assert.assertEquals(1, results.size());
+
+        Result result = results.get(0);
+        Assert.assertEquals("contact 2", result.getObject("name"));
+        Assert.assertEquals(50000.02, result.getObject("income"));
+    }
+	@Test
     public void testComplexWhere1() throws SqlParseException, ClassNotFoundException, Sql4oException {
         String query = "from com.spaceprogram.db4o.Contact c where " +
                 "(age = 10 or age = 20) and " +
