@@ -3,6 +3,7 @@ package com.spaceprogram.db4o.sql.jdbc;
 import java.sql.*;
 import java.util.List;
 import java.util.ArrayList;
+import java.text.ParseException;
 
 import com.spaceprogram.db4o.sql.*;
 import com.spaceprogram.db4o.sql.parser.SqlParseException;
@@ -52,10 +53,10 @@ public class Db4oStatement implements Statement {
     private List queryDB(SqlQuery q) throws SQLException {
         try {
             return SqlToSoda.execute(conn.getOc(), q);
-        } catch (Sql4oException e) {
+        } catch (Exception e) {
             throw new SQLException(e.getMessage());
         }
-    }
+	}
 
 
     /**

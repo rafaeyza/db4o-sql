@@ -10,7 +10,11 @@ import com.db4o.query.Query;
 import com.db4o.query.Constraint;
 
 import java.util.List;
+import java.util.Date;
 import java.lang.reflect.Constructor;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 
 /**
  * This is a core class that will take a parsed SQL string, convert it to a soda query, then execute it.
@@ -22,8 +26,10 @@ import java.lang.reflect.Constructor;
 public class SqlToSoda {
     // this is here just in case we want this field to be configurable
     public static boolean allowClassNotFound = true;
+	private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
+	public static DateFormat df = new SimpleDateFormat(DATE_FORMAT_PATTERN);
 
-    public static List<Result> execute(ObjectContainer oc, SqlQuery q) throws Sql4oException {
+	public static List<Result> execute(ObjectContainer oc, SqlQuery q) throws Sql4oException {
         //System.out.println("QUERY: " + q);
         Query query = oc.query();
         for (int i = 0; i < q.getFrom().getClassRefs().size(); i++) {
@@ -91,7 +97,7 @@ public class SqlToSoda {
     }
 
 
-    private static void applyWhere(ReflectClass reflectClass, Query dq, WhereExpression where) throws CloneNotSupportedException, Sql4oException {
+    private static void applyWhere(ReflectClass reflectClass, Query dq, WhereExpression where) throws CloneNotSupportedException, Sql4oException{
         List<WhereExpression> expressions = where.getExpressions();
         Constraint previousConstraint = null;
         // then sub constraint, todo: make this happen somehow: AND's and OR's, etc
@@ -124,7 +130,7 @@ public class SqlToSoda {
 
     }
 
-    private static Constraint makeConstraint(ReflectClass reflectClass, Query dq, WhereExpression where) throws CloneNotSupportedException, Sql4oException {
+    private static Constraint makeConstraint(ReflectClass reflectClass, Query dq, WhereExpression where) throws CloneNotSupportedException, Sql4oException{
         //System.out.println("adding constraint: " + where);
         // convert to proper object type
         ReflectField field = reflectClass.getDeclaredField(where.getField());
@@ -140,27 +146,56 @@ public class SqlToSoda {
         return constraint;
     }
 
-    private static Object convertStringToObjectValue(Class c, WhereExpression where) {
+    private static Object convertStringToObjectValue(Class c, WhereExpression where) throws Sql4oException {
         Object val = null;
-        if (c.isPrimitive()) {
-            //System.out.println("is primitive");
+
+		System.out.println("Class " + c);
+		if (c.isPrimitive()) {
+            //System.out.println("is primitive " + c);
             if (c.isAssignableFrom(Integer.TYPE)) {
-                //System.out.println("isassignable INT");
                 val = new Integer(where.getValue());
             } else if (c.isAssignableFrom(Long.TYPE)) {
                 val = new Long(where.getValue());
             } else if (c.isAssignableFrom(Double.TYPE)) {
                 val = new Double(where.getValue());
+            }  else if (c.isAssignableFrom(Float.TYPE)) {
+                val = new Float(where.getValue());
+            } else if (c.isAssignableFrom(Short.TYPE)) {
+                val = new Short(where.getValue());
+            } else if (c.isAssignableFrom(Byte.TYPE)) {
+                val = new Byte(where.getValue());
             }
             // todo: add the rest of the types
-
-        } else {
-            val = cleanValue(where.getValue());
-        }
+		} else if (Number.class.isAssignableFrom(c)) {
+			if(c == Integer.class){
+				val = new Integer(where.getValue());
+			} else if(c == Long.class){
+				val = new Long(where.getValue());
+			} else if(c == Float.class){
+				val = new Float(where.getValue());
+			} else if(c == Double.class){
+				val = new Double(where.getValue());
+			} else if(c == Short.class){
+				val = new Short(where.getValue());
+			} else if(c == Byte.class){
+				val = new Byte(where.getValue());
+			}
+		} else if(c == String.class){
+			val = cleanValue(where.getValue());
+		} else if(c == Date.class){
+			String dateString = (String) cleanValue(where.getValue());
+			try {
+				val = df.parse(dateString);
+			} catch (ParseException e) {
+				throw new Sql4oException("Could not parse date: " + dateString + ". Format must be: " + DATE_FORMAT_PATTERN);
+			}
+		} else {
+			throw new Sql4oException("Value type is not recognized! " + c + " : " + where.getValue());
+		}
         return val;
     }
 
-    private static Object cleanValue(String value) {
+    private static String cleanValue(String value) {
         // strip quotes
         value = value.replace("'", "");
         return value;

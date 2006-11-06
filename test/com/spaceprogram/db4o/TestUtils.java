@@ -8,6 +8,7 @@ import com.spaceprogram.db4o.sql.ObjectSetWrapper;
 import com.spaceprogram.db4o.sql.Sql4oException;
 
 import java.util.List;
+import java.util.Calendar;
 
 /**
  * User: treeder
@@ -21,15 +22,26 @@ public class TestUtils {
     public static void makeContacts(ObjectContainer oc, int numberOfContacts) {
         System.out.println("Making " + numberOfContacts + " contacts");
         // a some contacts too
-        for (int i = 0; i < numberOfContacts; i++) {
+		Calendar cal = Calendar.getInstance();
+		for (int i = 0; i < numberOfContacts; i++) {
             Contact c = new Contact();
             c.setId(contactNumber);
             c.setName("contact " + i);
             c.setEmail("email@" + i + ".com");
             c.setCategory("friends");
             c.setAge(i * 10);
-            if(i < 5) c.setIncome(50000.02);
-            else c.setIncome(61000.67);
+			c.setBirthDate(cal.getTime());
+			cal.add(Calendar.DAY_OF_YEAR, -1);
+			c.setLongField(new Long(i));
+
+			if(i < 5) {
+				c.setIncome(50000.02);
+				c.setDoubleField(new Double(c.getIncome()));
+			}
+            else {
+				c.setIncome(61000.67);
+				c.setDoubleField(new Double(c.getIncome()));
+			}
             oc.set(c);
             contactNumber++;
         }
