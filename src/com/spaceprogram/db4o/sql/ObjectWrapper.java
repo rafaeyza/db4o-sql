@@ -26,7 +26,7 @@ public class ObjectWrapper implements Result {
 
     public Object getObject(String fieldName) throws Sql4oException {
         ReflectField f = objectSetWrapper.getFieldForColumn(ob, fieldName);
-        return getFieldValue(f, ob);
+		return getFieldValue(f, ob);
     }
 
     private Object getFieldValue(ReflectField f, Object ob) {

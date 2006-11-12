@@ -6,10 +6,7 @@ import com.db4o.reflect.generic.GenericVirtualField;
 import com.db4o.ext.StoredClass;
 import com.db4o.ObjectContainer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Comparator;
-import java.util.Collections;
+import java.util.*;
 import java.text.Collator;
 
 /**
@@ -19,72 +16,103 @@ import java.text.Collator;
  */
 public class ReflectHelper {
 
-    /**
-     *
-     * @param container
-     * @return list of ReflectClass objects that have been stored in database
-     */
-    public static List getUserStoredClasses(ObjectContainer container) {
-        String[] ignore = new String[]{
-                // todo: decide which should be filtered for sure
-                "java.lang.",
-                "java.util.",
-                "java.math.",
-                "com.db4o.",
-                "j4o.lang.AssemblyNameHint",
-        };
+	/**
+	 * @param container
+	 * @return list of ReflectClass objects that have been stored in database
+	 */
+	public static List getUserStoredClasses(ObjectContainer container) {
+		String[] ignore = new String[]{
+				// todo: decide which should be filtered for sure
+				"java.lang.",
+				"java.util.",
+				"java.math.",
+				"com.db4o.",
+				"j4o.lang.AssemblyNameHint",
+		};
 
-        // Get the known classes
-        ReflectClass[] knownClasses = container.ext().knownClasses();
+		// Get the known classes
+		ReflectClass[] knownClasses = container.ext().knownClasses();
 
-        // Filter them
-        List filteredList = new ArrayList();
-        for (int i = 0; i < knownClasses.length; i++) {
-            ReflectClass knownClass = knownClasses[i];
-            if (knownClass.isArray() || knownClass.isPrimitive()) {
-                continue;
-            }
-            boolean take = true;
-            for (int j = 0; j < ignore.length; j++) {
-                if(knownClass.getName().startsWith(ignore[j])){
-                    take = false;
-                    break;
-                }
-            }
-            if(! take){
-                continue;
-            }
-            StoredClass sc = container.ext().storedClass(knownClass.getName());
-            if(sc == null){
-                continue;
-            }
-            filteredList.add(knownClass);
-        }
+		// Filter them
+		List filteredList = new ArrayList();
+		for (int i = 0; i < knownClasses.length; i++) {
+			ReflectClass knownClass = knownClasses[i];
+			if (knownClass.isArray() || knownClass.isPrimitive()) {
+				continue;
+			}
+			boolean take = true;
+			for (int j = 0; j < ignore.length; j++) {
+				if (knownClass.getName().startsWith(ignore[j])) {
+					take = false;
+					break;
+				}
+			}
+			if (!take) {
+				continue;
+			}
+			StoredClass sc = container.ext().storedClass(knownClass.getName());
+			if (sc == null) {
+				continue;
+			}
+			filteredList.add(knownClass);
+		}
 
-          // Sort them
-        Collections.sort(filteredList, new Comparator() {
-            private Collator comparator = Collator.getInstance();
-            public int compare(Object arg0, Object arg1) {
-                ReflectClass class0 = (ReflectClass) arg0;
-                ReflectClass class1 = (ReflectClass) arg1;
+		// Sort them
+		Collections.sort(filteredList, new Comparator() {
+			private Collator comparator = Collator.getInstance();
 
-                return comparator.compare(class0.getName(), class1.getName());
-            }
-        });
+			public int compare(Object arg0, Object arg1) {
+				ReflectClass class0 = (ReflectClass) arg0;
+				ReflectClass class1 = (ReflectClass) arg1;
 
-        return filteredList;
-    }
-     public static ReflectField[] getDeclaredFields(ReflectClass aClass) {
-        // need to filter here because some internal fields are coming through (v4oversion and v4ouuid)
-        ReflectField[] fields = aClass.getDeclaredFields();
-        List<ReflectField> ret = new ArrayList();
-        int x = 0;
-        for (int i = 0; i < fields.length; i++) {
-            ReflectField field = fields[i];
-            if (!(field instanceof GenericVirtualField)) {
-                ret.add(field);
-            }
-        }
-        return ret.toArray(new ReflectField[ret.size()]);
-    }
+				return comparator.compare(class0.getName(), class1.getName());
+			}
+		});
+
+		return filteredList;
+	}
+
+	public static ReflectField[] getDeclaredFieldsInHeirarchy(ReflectClass aClass) {
+		List<ReflectField> ret = getDeclaredFieldsListInHeirarchy(aClass);
+		return ret.toArray(new ReflectField[ret.size()]);
+	}
+
+	private static List getDeclaredFieldsListInHeirarchy(ReflectClass aClass) {
+		List ret = getDeclaredFieldsList(aClass);
+		ReflectClass parent = aClass.getSuperclass();
+		if (parent != null) {
+			ret.addAll(getDeclaredFieldsListInHeirarchy(parent));
+		}
+		return ret;
+	}
+
+	public static List<ReflectField> getDeclaredFieldsList(ReflectClass aClass) {
+		List<ReflectField> ret = new ArrayList();
+		ReflectField[] fields = aClass.getDeclaredFields();
+		// need to filter here because some internal fields are coming through (v4oversion and v4ouuid)
+		for (int i = 0; i < fields.length; i++) {
+			ReflectField field = fields[i];
+			if (!(field instanceof GenericVirtualField)) {
+				ret.add(field);
+			}
+		}
+		return ret;
+	}
+
+	public static ReflectField[] getDeclaredFields(ReflectClass aClass) {
+		List<ReflectField> ret = getDeclaredFieldsList(aClass);
+		return ret.toArray(new ReflectField[ret.size()]);
+	}
+
+	public static ReflectField getDeclaredFieldInHeirarchy(ReflectClass reflectClass, String field) {
+		ReflectField rf = reflectClass.getDeclaredField(field);
+		if (rf == null) {
+			// check up heirarchy
+			ReflectClass parent = reflectClass.getSuperclass();
+			if (parent != null) {
+				return getDeclaredFieldInHeirarchy(parent, field);
+			}
+		}
+		return rf;
+	}
 }
