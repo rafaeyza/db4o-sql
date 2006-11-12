@@ -77,13 +77,14 @@ public class SqlToSoda {
                 if (selFields.size() == 1 && selFields.get(0).equals("*")) {
                     return;
                 }
-                ReflectField[] fields = ReflectHelper.getDeclaredFields(reflectClass);
+                ReflectField[] fields = ReflectHelper.getDeclaredFieldsInHeirarchy(reflectClass);
                 for (int i = 0; i < selFields.size(); i++) {
                     String field = selFields.get(i);
                     boolean fieldOk = false;
                     for (int j = 0; j < fields.length; j++) {
                         ReflectField reflectField = fields[j];
-                        if (reflectField.getName().equals(field)) {
+						System.out.println("sel: " + field + " rf:" + reflectField.getName());
+						if (reflectField.getName().equals(field)) {
                             fieldOk = true;
                             break;
                         }
@@ -133,8 +134,8 @@ public class SqlToSoda {
     private static Constraint makeConstraint(ReflectClass reflectClass, Query dq, WhereExpression where) throws CloneNotSupportedException, Sql4oException{
         //System.out.println("adding constraint: " + where);
         // convert to proper object type
-        ReflectField field = reflectClass.getDeclaredField(where.getField());
-        if (field == null) throw new Sql4oException("Field not found: " + where.getField());
+        ReflectField field = ReflectHelper.getDeclaredFieldInHeirarchy(reflectClass, where.getField());
+		if (field == null) throw new Sql4oException("Field not found: " + where.getField());
         ReflectClass fieldClass = field.getFieldType();
         Class c = JdkReflector.toNative(fieldClass);
         Object val = convertStringToObjectValue(c, where);

@@ -572,12 +572,12 @@ public class Db4oDatabaseMetaData implements DatabaseMetaData {
         ListResultSet<Map<String, Object>> rs = new ListResultSet();
         List<ReflectClass> storedClasses = ReflectHelper.getUserStoredClasses(db4oConnection.getObjectContainer());
         for (int i = 0; i < storedClasses.size(); i++) {
-            ReflectClass o = storedClasses.get(i);
-            ReflectField[] fields = ReflectHelper.getDeclaredFields(o);
+            ReflectClass reflectClass = storedClasses.get(i);
+            ReflectField[] fields = ReflectHelper.getDeclaredFieldsInHeirarchy(reflectClass);
             for (int j = 0; j < fields.length; j++) {
                 ReflectField field = fields[j];
                 Map<String, Object> row = new HashMap();
-                row.put("TABLE_NAME", o.getName());
+                row.put("TABLE_NAME", reflectClass.getName());
                 row.put("COLUMN_NAME", field.getName());
                 row.put("DATA_TYPE", getSqlType(field.getFieldType()));
                 row.put("TYPE_NAME", "String");

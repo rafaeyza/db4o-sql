@@ -8,7 +8,7 @@ import java.util.Date;
  * Date: May 18, 2006
  * Time: 5:48:04 PM
  */
-public class Contact  {
+public class Contact extends ParentClass1 {
     private Integer id;
     private String name;
     private String email;
@@ -37,7 +37,7 @@ public class Contact  {
     }
 
     public String toString() {
-        return "Contact [" + id + "]: name=" + name + " age=" + age + " category=" + category;
+        return "Contact [" + id + "]: name=" + name + " age=" + age + " category=" + category + " pc1:" + pc1 + " pc2:" + pc2;
     }
 
     public void setEmail(String email) {

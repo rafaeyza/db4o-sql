@@ -4,6 +4,7 @@ import com.db4o.ObjectSet;
 import com.db4o.ObjectContainer;
 import com.db4o.reflect.ReflectClass;
 import com.db4o.reflect.ReflectField;
+import com.db4o.reflect.generic.GenericReflector;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -37,7 +38,8 @@ public class ObjectSetMetaDataImpl implements ObjectSetMetaData {
 
 
     private void init(Object lastResult, ObjectSetWrapper objectSetWrapper, ObjectContainer oc) {
-        reflectClass = oc.ext().reflector().forObject(lastResult);
+		GenericReflector reflector = oc.ext().reflector();
+		reflectClass = reflector.forObject(lastResult);
         if (objectSetWrapper.hasSelectFields()) {
             fields = objectSetWrapper.getSelectFields();
             columnCount = fields.size();
@@ -53,7 +55,7 @@ public class ObjectSetMetaDataImpl implements ObjectSetMetaData {
     }
 
     private ReflectField[] getDeclaredFields() {
-        return ReflectHelper.getDeclaredFields(reflectClass);
+        return ReflectHelper.getDeclaredFieldsInHeirarchy(reflectClass);
     }
 
 

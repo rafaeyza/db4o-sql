@@ -25,7 +25,9 @@ public class TestUtils {
 		Calendar cal = Calendar.getInstance();
 		for (int i = 0; i < numberOfContacts; i++) {
             Contact c = new Contact();
-            c.setId(contactNumber);
+			c.setPc1("pc1 value");
+			c.setPc2("pc2 value");
+			c.setId(contactNumber);
             c.setName("contact " + i);
             c.setEmail("email@" + i + ".com");
             c.setCategory("friends");

@@ -70,7 +70,7 @@ public class ObjectSetWrapper implements ObjectSet {
     }
 
     private ReflectField getField(ReflectClass aClass, int columnIndex) {
-        ReflectField[] fields = ReflectHelper.getDeclaredFields(aClass);
+        ReflectField[] fields = ReflectHelper.getDeclaredFieldsInHeirarchy(aClass);
         if (fields.length <= columnIndex || columnIndex < 0) {
             // then out of bounds, so throw
             throw new Sql4oRuntimeException("Field index out of bounds. received: " + columnIndex + " max: " + fields.length);
@@ -85,8 +85,7 @@ public class ObjectSetWrapper implements ObjectSet {
 
 
     private ReflectField getField(ReflectClass aClass, String fieldName) throws Sql4oException {
-        // todo: check for generic object here and try to use that GenericObject genericObject =
-        ReflectField field = aClass.getDeclaredField(fieldName);
+        ReflectField field = ReflectHelper.getDeclaredFieldInHeirarchy(aClass, fieldName);
         if(field == null){
             throw new Sql4oException("Field " + fieldName + " does not exist.");
         }
@@ -97,50 +96,6 @@ public class ObjectSetWrapper implements ObjectSet {
 
     public boolean hasSelectFields() {
         return (selectFields != null && selectFields.size() > 0 && !selectFields.get(0).equals("*"));
-    }
-
-    /**
-     * This method will do the conversion to the array
-     *
-     * @param next
-     * @return
-     * @deprecated
-     */
-    private Object[] arrayStruct(Object next) throws SQLException {
-        System.out.println("making array");
-        Object[] ret;
-        if (selectFields != null && selectFields.size() > 0) {
-            ret = new Object[selectFields.size()];
-            for (int i = 0; i < selectFields.size(); i++) {
-                String fieldName = selectFields.get(i);
-                if (i == 0 && fieldName.equals("*")) {
-                    // then it's the full object
-                    ret[i] = next;
-                    break;
-                }
-                ret[i] = getFieldValue(next, fieldName);
-            }
-        } else {
-            // else just return full object
-            ret = new Object[1];
-            ret[0] = next;
-        }
-        return ret;
-    }
-
-    private Object getFieldValue(Object o, String fieldName) throws SQLException {
-        Class c = o.getClass();
-        try {
-            Field field = c.getDeclaredField(fieldName);
-            // todo: use getters if exist
-            field.setAccessible(true);
-            Object value = field.get(o);
-            return value;
-        } catch (NoSuchFieldException e) {
-            throw new SQLException("No Such Field: " + fieldName);
-        } catch (IllegalAccessException e) {
-            throw new SQLException("Cannot access field: " + fieldName);
-        }
     }
 
     public ExtObjectSet ext() {
@@ -162,14 +117,7 @@ public class ObjectSetWrapper implements ObjectSet {
         }
         lastResult = next;
         index++;
-        // now replace with array structure based on fields chosen
-        // TRYING ObjectWrapper instead
-        //try {
-        //return arrayStruct(next);
         return new ObjectWrapper(this, next);
-        /*} catch (SQLException e) {
-            throw new Sql4oRuntimeException(e);
-        }*/
     }
 
     public Object get(int index) {
