@@ -79,10 +79,7 @@ public class ObjectSetWrapper implements ObjectSet {
             ret.setAccessible();
             return ret;
         }
-
     }
-
-
 
     private ReflectField getField(ReflectClass aClass, String fieldName) throws Sql4oException {
         ReflectField field = ReflectHelper.getDeclaredFieldInHeirarchy(aClass, fieldName);
