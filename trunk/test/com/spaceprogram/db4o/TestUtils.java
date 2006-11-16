@@ -18,8 +18,9 @@ import java.util.Calendar;
 public class TestUtils {
 
     public static int contactNumber = 0;
+	public static int idGen = 0; // added this after, that's why there is two things here
 
-    public static void makeContacts(ObjectContainer oc, int numberOfContacts) {
+	public static void makeContacts(ObjectContainer oc, int numberOfContacts) {
         System.out.println("Making " + numberOfContacts + " contacts");
         // a some contacts too
 		Calendar cal = Calendar.getInstance();
@@ -44,15 +45,23 @@ public class TestUtils {
 				c.setIncome(61000.67);
 				c.setDoubleField(new Double(c.getIncome()));
 			}
-            oc.set(c);
+			Address address = new Address(nextId(), "Rodeo Drive");
+			City city = new City(nextId(), "San Francisco");
+			address.setCity(city);
+			c.setAddress(address);
+			oc.set(c);
             contactNumber++;
         }
         oc.commit();
 
     }
 
+	private static Integer nextId() {
+		return ++idGen;
+	}
 
-    public static int clear(ObjectContainer oc, Class aClass) {
+
+	public static int clear(ObjectContainer oc, Class aClass) {
         return ObjectContainerUtils.clear(oc, aClass);
     }
 

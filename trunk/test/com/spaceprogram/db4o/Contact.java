@@ -20,6 +20,8 @@ public class Contact extends ParentClass1 {
 	private Long longField;
 	private Double doubleField;
 
+	private Address address;
+
 	public Integer getId() {
         return id;
     }
@@ -94,5 +96,13 @@ public class Contact extends ParentClass1 {
 
 	public void setDoubleField(Double doubleField) {
 		this.doubleField = doubleField;
+	}
+
+	public Address getAddress() {
+		return address;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
 	}
 }
