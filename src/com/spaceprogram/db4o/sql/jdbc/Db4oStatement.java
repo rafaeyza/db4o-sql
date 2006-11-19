@@ -3,9 +3,9 @@ package com.spaceprogram.db4o.sql.jdbc;
 import java.sql.*;
 import java.util.List;
 import java.util.ArrayList;
-import java.text.ParseException;
 
 import com.spaceprogram.db4o.sql.*;
+import com.spaceprogram.db4o.sql.query.SqlQuery;
 import com.spaceprogram.db4o.sql.parser.SqlParseException;
 
 /**

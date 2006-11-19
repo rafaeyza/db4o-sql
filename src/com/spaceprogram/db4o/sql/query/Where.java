@@ -1,6 +1,4 @@
-package com.spaceprogram.db4o.sql;
-
-import java.util.List;
+package com.spaceprogram.db4o.sql.query;
 
 /**
  * User: treeder
