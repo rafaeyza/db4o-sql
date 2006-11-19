@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.junit.Assert;
 import com.spaceprogram.db4o.sql.SqlStatement;
 import com.spaceprogram.db4o.sql.SqlParser;
-import com.spaceprogram.db4o.sql.SqlQuery;
+import com.spaceprogram.db4o.sql.query.SqlQuery;
 
 /**
  * User: treeder

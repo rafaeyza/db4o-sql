@@ -1,4 +1,4 @@
-package com.spaceprogram.db4o.sql;
+package com.spaceprogram.db4o.sql.query;
 
 import java.util.List;
 import java.util.ArrayList;

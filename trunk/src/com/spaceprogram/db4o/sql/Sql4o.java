@@ -1,6 +1,7 @@
 package com.spaceprogram.db4o.sql;
 
 import com.spaceprogram.db4o.sql.parser.SqlParseException;
+import com.spaceprogram.db4o.sql.query.SqlQuery;
 import com.db4o.ObjectContainer;
 
 import java.util.List;

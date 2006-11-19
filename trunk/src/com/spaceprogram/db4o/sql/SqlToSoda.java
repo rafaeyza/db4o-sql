@@ -4,17 +4,14 @@ import com.db4o.ObjectContainer;
 import com.db4o.ObjectSet;
 import com.db4o.reflect.ReflectClass;
 import com.db4o.reflect.ReflectField;
-import com.db4o.reflect.ReflectConstructor;
 import com.db4o.reflect.jdk.JdkReflector;
 import com.db4o.query.Query;
 import com.db4o.query.Constraint;
+import com.spaceprogram.db4o.sql.query.WhereExpression;
+import com.spaceprogram.db4o.sql.query.SqlQuery;
 
 import java.util.List;
 import java.util.Date;
-import java.lang.reflect.Constructor;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.text.ParseException;
 
 /**
  * This is a core class that will take a parsed SQL string, convert it to a soda query, then execute it.
