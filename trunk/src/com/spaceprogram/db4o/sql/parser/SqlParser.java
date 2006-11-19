@@ -1,7 +1,7 @@
-package com.spaceprogram.db4o.sql;
+package com.spaceprogram.db4o.sql.parser;
 
-import com.spaceprogram.db4o.sql.parser.SqlParseException;
 import com.spaceprogram.db4o.sql.query.*;
+import com.spaceprogram.db4o.sql.SqlStatement;
 
 import java.util.List;
 import java.util.ArrayList;
