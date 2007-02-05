@@ -4,6 +4,7 @@ import com.db4o.reflect.ReflectClass;
 import com.db4o.reflect.ReflectField;
 import com.db4o.reflect.generic.GenericVirtualField;
 import com.db4o.ext.StoredClass;
+import com.db4o.ext.StoredField;
 import com.db4o.ObjectContainer;
 
 import java.util.*;
@@ -77,7 +78,9 @@ public class ReflectHelper {
 		return ret.toArray(new ReflectField[ret.size()]);
 	}
 
-	private static List getDeclaredFieldsListInHeirarchy(ReflectClass aClass) {
+	private static List<ReflectField> getDeclaredFieldsListInHeirarchy(ReflectClass aClass) {
+		//System.out.println("getting fields for " + aClass);
+		if(aClass == null) return null;
 		List ret = getDeclaredFieldsList(aClass);
 		ReflectClass parent = aClass.getSuperclass();
 		if (parent != null) {
@@ -92,6 +95,35 @@ public class ReflectHelper {
 		// need to filter here because some internal fields are coming through (v4oversion and v4ouuid)
 		for (int i = 0; i < fields.length; i++) {
 			ReflectField field = fields[i];
+			if (!(field instanceof GenericVirtualField)) {
+				ret.add(field);
+			}
+		}
+		return ret;
+	}
+
+	public static StoredField[] getDeclaredFieldsInHeirarchy(StoredClass aClass) {
+		List<ReflectField> ret = getDeclaredFieldsListInHeirarchy(aClass);
+		return ret.toArray(new StoredField[ret.size()]);
+	}
+
+	private static List getDeclaredFieldsListInHeirarchy(StoredClass aClass) {
+		//System.out.println("getting fields for " + aClass);
+		if(aClass == null) return null;
+		List ret = getDeclaredFieldsList(aClass);
+		StoredClass parent = aClass.getParentStoredClass();
+		if (parent != null) {
+			ret.addAll(getDeclaredFieldsListInHeirarchy(parent));
+		}
+		return ret;
+	}
+
+	public static List<StoredField> getDeclaredFieldsList(StoredClass aClass) {
+		List<StoredField> ret = new ArrayList();
+		StoredField[] fields = aClass.getStoredFields();
+		// need to filter here because some internal fields are coming through (v4oversion and v4ouuid)
+		for (int i = 0; i < fields.length; i++) {
+			StoredField field = fields[i];
 			if (!(field instanceof GenericVirtualField)) {
 				ret.add(field);
 			}

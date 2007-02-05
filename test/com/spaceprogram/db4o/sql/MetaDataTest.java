@@ -22,7 +22,7 @@ public class MetaDataTest extends ContactTest {
         ObjectSetWrapper wrapper = (ObjectSetWrapper) results;
         ObjectSetMetaData metaData = wrapper.getMetaData();
 
-        Assert.assertEquals(5, metaData.getColumnCount());
+        Assert.assertEquals(12, metaData.getColumnCount());
 
     }
 	@Test

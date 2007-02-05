@@ -5,6 +5,8 @@ import com.db4o.ObjectContainer;
 import com.db4o.reflect.ReflectClass;
 import com.db4o.reflect.ReflectField;
 import com.db4o.reflect.generic.GenericReflector;
+import com.spaceprogram.db4o.sql.query.SqlQuery;
+import com.spaceprogram.db4o.sql.query.From;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -15,60 +17,84 @@ import java.util.ArrayList;
  * Time: 3:43:49 PM
  */
 public class ObjectSetMetaDataImpl implements ObjectSetMetaData {
-    private int columnCount;
-    private ReflectClass reflectClass;
-    private List<String> fields;
+	private List<String> fields = new ArrayList<String>();
+	private List<ReflectField> reflectFields = new ArrayList<ReflectField>();
 
 
-    public ObjectSetMetaDataImpl(ObjectSet results, ObjectSetWrapper objectSetWrapper, ObjectContainer oc) {
-        init(results, objectSetWrapper, oc);
-    }
+	public ObjectSetMetaDataImpl(ObjectSet results, ObjectSetWrapper objectSetWrapper, ObjectContainer oc, SqlQuery sqlQuery) {
+		init(results, objectSetWrapper, oc, sqlQuery);
+	}
 
-    private void init(ObjectSet results, ObjectSetWrapper objectSetWrapper, ObjectContainer oc) {
-        // examine objects in result set
-        // guess we'll have to get an object here first
-        if (objectSetWrapper.getLastResult() != null) {
-            init(objectSetWrapper.getLastResult(), objectSetWrapper, oc);
-        } else if (results.hasNext()) {
-            Object nextResult = results.next();
-            objectSetWrapper.setNextResult(nextResult);
-            init(nextResult, objectSetWrapper, oc);
-        }
-    }
+	private void init(ObjectSet results, ObjectSetWrapper objectSetWrapper, ObjectContainer oc, SqlQuery sqlQuery) {
+//		if (objectSetWrapper.getSelectFields() != null) {
+//			fields = objectSetWrapper.getSelectFields();
+			//reflectFields = getReflectFieldsFor(fields);
+			//columnCount = objectSetWrapper.getSelectFields().size();
+//		} else {
+			From from = sqlQuery.getFrom();
+			List<ClassRef> classRefs = from.getClassRefs();
+			for (int i = 0; i < classRefs.size(); i++) {
+				ClassRef classRef = classRefs.get(i);
+				String cname = classRef.getClassName();
+				GenericReflector reflector = oc.ext().reflector();
+				ReflectClass reflectClass = reflector.forName(cname);
+				//System.out.println("reflectClass for " + cname + " - " + reflectClass);
+				ReflectField reflectFields[] = getDeclaredFields(reflectClass);
+				for (int j = 0; j < reflectFields.length; j++) {
+					ReflectField reflectField = reflectFields[j];
+				//	System.out.println("adding field: " + reflectField.getName());
+					if (objectSetWrapper.getSelectFields() != null) {
+						if(objectSetWrapper.getSelectFields().contains(reflectField.getName())){
+				//			System.out.println("added field: " + reflectField.getName());
+							this.reflectFields.add(reflectField);
+							fields.add(reflectField.getName());
+						}
+					} else {
+						this.reflectFields.add(reflectField);
+						fields.add(reflectField.getName());
+					}
+	//			}
+			}
+		}
+
+	}
+	private ReflectField[] getDeclaredFields(ReflectClass reflectClass) {
+		return ReflectHelper.getDeclaredFieldsInHeirarchy(reflectClass);
+	}
 
 
-    private void init(Object lastResult, ObjectSetWrapper objectSetWrapper, ObjectContainer oc) {
-		GenericReflector reflector = oc.ext().reflector();
-		reflectClass = reflector.forObject(lastResult);
-        if (objectSetWrapper.hasSelectFields()) {
-            fields = objectSetWrapper.getSelectFields();
-            columnCount = fields.size();
+	public int getColumnCount() {
+		return fields.size();
+	}
+
+	public String getColumnName(int column) {
+		if (column >= 0 && column < fields.size()) {
+			return fields.get(column);
+		}
+		return null;
+	}
+
+	public ReflectField getColumnReflectField(int fieldIndex) {
+		if (reflectFields.size() <= fieldIndex || fieldIndex < 0) {
+            // then out of bounds, so throw
+            throw new Sql4oRuntimeException("Field index out of bounds. received: " + fieldIndex + " max: " + reflectFields.size());
         } else {
-            fields = new ArrayList<String>();
-            ReflectField[] reflectFields = getDeclaredFields();
-            for (int i = 0; i < reflectFields.length; i++) {
-                ReflectField reflectField = reflectFields[i];
-                fields.add(reflectField.getName());
-            }
-            columnCount = fields.size();
+            ReflectField ret = reflectFields.get(fieldIndex);
+            ret.setAccessible();
+            return ret;
         }
-    }
+	}
 
-    private ReflectField[] getDeclaredFields() {
-        return ReflectHelper.getDeclaredFieldsInHeirarchy(reflectClass);
-    }
-
-
-    public int getColumnCount() {
-        return columnCount;
-    }
-
-    public String getColumnName(int column) {
-        if(column >= 0 && column < fields.size()){
-            return fields.get(column);
-        }
-        return null;
-    }
+	public ReflectField getColumnReflectField(String fieldName) {
+		for (int i = 0; i < reflectFields.size(); i++) {
+			ReflectField reflectField = reflectFields.get(i);
+			if(reflectField.getName().equals(fieldName)){
+				reflectField.setAccessible();
+				return reflectField;
+			}
+		}
+		return null;
+	}
 
 
 }

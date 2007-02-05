@@ -416,4 +416,16 @@ public class SqlTest extends ContactTest {
 		Contact c = (Contact) result.getBaseObject(0);
 		Assert.assertEquals(2, c.getAddress().getCity().getId());
 	}
+	@Test
+	public void testOrdering() throws SqlParseException, ClassNotFoundException, Sql4oException {
+		// age2 is not valid
+		String query = "from com.spaceprogram.db4o.Contact c where c.address.city.id = 2 order by name desc";
+
+		// todo: haven't done this yet
+		ObjectSetWrapper results = (ObjectSetWrapper) Sql4o.execute(oc, query);
+		Assert.assertEquals(1, results.size());
+		Result result = (Result) results.get(0);
+		Contact c = (Contact) result.getBaseObject(0);
+		Assert.assertEquals(2, c.getAddress().getCity().getId());
+	}
 }

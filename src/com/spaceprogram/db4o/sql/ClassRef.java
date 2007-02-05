@@ -10,12 +10,13 @@ public class ClassRef {
     private String alias;
 
     public ClassRef(String className) {
-        this.className = className;
+		this(className, null);
     }
 
     public ClassRef(String className, String alias) {
-        this.className = className;
-        this.alias = alias;
+		// if .NET query, might be surrouned by quotes, eg: FROM 'Quizlet.Question, Quizlet.Framework'
+		this.className = className;
+		this.alias = alias;
     }
 
     public String toString() {
@@ -25,7 +26,7 @@ public class ClassRef {
     }
 
     public String getClassName() {
-        return className;
+		return className.replaceAll("'", "");
     }
 
     public String getAlias() {
