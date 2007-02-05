@@ -3,7 +3,6 @@ package com.spaceprogram.db4o.sql.parser;
 import org.junit.Test;
 import org.junit.Assert;
 import com.spaceprogram.db4o.sql.SqlStatement;
-import com.spaceprogram.db4o.sql.SqlParser;
 import com.spaceprogram.db4o.sql.query.SqlQuery;
 
 /**
@@ -31,7 +30,17 @@ public class ParserTest {
                 , new QueryString("FROM demo.objectmanager.model.Contact where age <= 2 and age>=100", "from demo.objectmanager.model.Contact where age <= 2 and age >= 100")
                 , new QueryString("FROM demo.objectmanager.model.Contact where age <= 2 and age>= 100", "from demo.objectmanager.model.Contact where age <= 2 and age >= 100")
                 , new QueryString("FROM 'Quizlet.Question, Quizlet.Framework'", "from 'Quizlet.Question, Quizlet.Framework'")
-               };
+				, new QueryString("select c.id, c.name from Contact c where c.id = 123 and ( c.name = 'contact 1' or c.name = 'contact 2' )" +
+				" ORDER BY c.id",
+				"select c.id, c.name from Contact c where c.id = 123 and ( c.name = 'contact 1' or c.name = 'contact 2' )" +
+				" ORDER BY c.id ASC")
+				, new QueryString("select c.id, c.name from Contact c where c.id = 123 and ( c.name = 'contact 1' or c.name = 'contact 2' )" +
+				" ORDER BY c.id ASC")
+				, new QueryString("select c.id, c.name from Contact c where c.id = 123 and ( c.name = 'contact 1' or c.name = 'contact 2' )" +
+				" ORDER BY c.id DESC")
+
+
+			   };
         for (int i = 0; i < queryStringsToTest.length; i++) {
             QueryString s = queryStringsToTest[i];
             System.out.println("Input: " + s.getInput());

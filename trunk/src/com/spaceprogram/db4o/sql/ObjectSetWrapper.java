@@ -8,6 +8,7 @@ import com.db4o.reflect.generic.GenericReflector;
 import com.db4o.reflect.ReflectField;
 import com.db4o.reflect.ReflectClass;
 import com.db4o.ext.ExtObjectSet;
+import com.spaceprogram.db4o.sql.query.SqlQuery;
 
 import java.util.List;
 import java.util.Iterator;
@@ -30,16 +31,23 @@ public class ObjectSetWrapper implements ObjectSet {
     private Object nextResult;
     private ObjectSetMetaData objectSetMetaData;
     private ObjectContainer oc;
+	private SqlQuery sqlQuery;
 
 
-    public ObjectSetWrapper(ObjectContainer oc) {
+	public ObjectSetWrapper(ObjectContainer oc, SqlQuery q, ObjectSet results) {
         this.oc = oc;
-    }
+		sqlQuery = q;
+		setObjectSet(results);
+		if (q.getSelect() != null) {
+			setSelectFields(q.getSelect().getFields());
+		}
+		objectSetMetaData = new ObjectSetMetaDataImpl(results, this, oc, sqlQuery);
+	}
 
     public ObjectSetMetaData getMetaData() {
-        if (objectSetMetaData == null) {
-            objectSetMetaData = new ObjectSetMetaDataImpl(results, this, oc);
-        }
+       /* if (objectSetMetaData == null) {
+            objectSetMetaData = new ObjectSetMetaDataImpl(results, this, oc, sqlQuery);
+        }*/
         return objectSetMetaData;
     }
 
@@ -53,43 +61,21 @@ public class ObjectSetWrapper implements ObjectSet {
      * @return
      */
     public ReflectField getFieldForColumn(Object ob, int columnIndex) throws Sql4oException {
-        ReflectClass reflectClass = oc.ext().reflector().forObject(ob);
-        if (hasSelectFields() && selectFields.size() > columnIndex) {
-            return getField(reflectClass, selectFields.get(columnIndex));
-        } else {
-            return getField(reflectClass, columnIndex);
-        }
-    }
+       return objectSetMetaData.getColumnReflectField(columnIndex);
+	}
 
     public ReflectField getFieldForColumn(Object ob, String fieldName) throws Sql4oException {
         if (hasSelectFields() && !selectFields.contains(fieldName)) {
             throw new Sql4oRuntimeException("Field not found: " + fieldName);
         }
-        ReflectClass reflectClass = oc.ext().reflector().forObject(ob);
-        return getField(reflectClass, fieldName);
-    }
-
-    private ReflectField getField(ReflectClass aClass, int columnIndex) {
-        ReflectField[] fields = ReflectHelper.getDeclaredFieldsInHeirarchy(aClass);
-        if (fields.length <= columnIndex || columnIndex < 0) {
-            // then out of bounds, so throw
-            throw new Sql4oRuntimeException("Field index out of bounds. received: " + columnIndex + " max: " + fields.length);
-        } else {
-            ReflectField ret = fields[columnIndex];
-            ret.setAccessible();
-            return ret;
-        }
-    }
-
-    private ReflectField getField(ReflectClass aClass, String fieldName) throws Sql4oException {
-        ReflectField field = ReflectHelper.getDeclaredFieldInHeirarchy(aClass, fieldName);
-        if(field == null){
+        //ReflectClass reflectClass = oc.ext().reflector().forObject(ob);
+		ReflectField field = objectSetMetaData.getColumnReflectField(fieldName);
+		 if(field == null){
             throw new Sql4oException("Field " + fieldName + " does not exist.");
         }
-        field.setAccessible();
-
-        return field;
-    }
+		//return getField(reflectClass, fieldName);
+		return field;
+	}
 
     public boolean hasSelectFields() {
         return (selectFields != null && selectFields.size() > 0 && !selectFields.get(0).equals("*"));

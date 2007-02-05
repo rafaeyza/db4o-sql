@@ -1,5 +1,7 @@
 package com.spaceprogram.db4o.sql;
 
+import com.db4o.reflect.ReflectField;
+
 /**
  * User: treeder
  * Date: Aug 20, 2006
@@ -8,4 +10,8 @@ package com.spaceprogram.db4o.sql;
 public interface ObjectSetMetaData {
     int getColumnCount();
     String getColumnName(int column);
+
+	ReflectField getColumnReflectField(int fieldIndex);
+
+	ReflectField getColumnReflectField(String fieldName);
 }

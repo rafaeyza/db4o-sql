@@ -34,7 +34,7 @@ public abstract class ContactTest {
         server.grantAccess(username, password);
         ObjectContainer oc = server.openClient();
         TestUtils.makeContacts(oc, 10);
-        TestUtils.dump(oc);
+        //TestUtils.dump(oc);
         oc.close();
     }
 

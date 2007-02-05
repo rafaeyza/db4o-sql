@@ -11,8 +11,9 @@ public class SqlQuery extends SqlStatement {
     private Select select;
     private From from;
     private Where where;
+	private OrderBy orderBy;
 
-    public void setSelect(Select select) {
+	public void setSelect(Select select) {
         this.select = select;
     }
 
@@ -32,7 +33,10 @@ public class SqlQuery extends SqlStatement {
         if(where != null){
             buff.append(" ").append(where);
         }
-        return buff.toString();
+		if(orderBy != null){
+			buff.append(" ").append(orderBy);
+		}
+		return buff.toString();
     }
 
     public void setWhere(Where where) {
@@ -50,4 +54,12 @@ public class SqlQuery extends SqlStatement {
     public Where getWhere() {
         return where;
     }
+
+	public void setOrderBy(OrderBy orderBy) {
+		this.orderBy = orderBy;
+	}
+
+	public OrderBy getOrderBy() {
+		return orderBy;
+	}
 }

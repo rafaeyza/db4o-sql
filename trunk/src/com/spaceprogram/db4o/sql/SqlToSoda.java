@@ -9,6 +9,7 @@ import com.db4o.query.Query;
 import com.db4o.query.Constraint;
 import com.spaceprogram.db4o.sql.query.WhereExpression;
 import com.spaceprogram.db4o.sql.query.SqlQuery;
+import com.spaceprogram.db4o.sql.query.OrderBy;
 
 import java.util.List;
 import java.util.Date;
@@ -32,8 +33,6 @@ public class SqlToSoda {
 			ClassRef classRef = q.getFrom().getClassRefs().get(i);
 			String className = classRef.getClassName();
 
-			// if .NET query, might be surrouned by quotes, eg: FROM 'Quizlet.Question, Quizlet.Framework'
-			className = className.replaceAll("'", "");
 
 			// Class may not be on classpath, so lets use the generic reflector
 			ReflectClass reflectClass = oc.ext().reflector().forName(className);
@@ -46,22 +45,15 @@ public class SqlToSoda {
 			verifySelectFields(reflectClass, q);
 
 			// todo: apply value based where conditions to specific classes, join conditions can then be done after
-			if (q.getWhere() != null) {
-				try {
-					applyWhere(reflectClass, query, q.getWhere().getRoot(), q);
-				} catch (CloneNotSupportedException e) {
-					e.printStackTrace();
-					throw new Sql4oException("Could not apply where conditions.  Exception: " + e.getMessage());
-				}
-			}
+			applyWhere(reflectClass, query, q);
+
+			applyOrderBy(reflectClass, query, q);
+
 		}
 
 		ObjectSet results = query.execute();
-		ObjectSetWrapper resultWrapper = new ObjectSetWrapper(oc);
-		resultWrapper.setObjectSet(results);
-		if (q.getSelect() != null) {
-			resultWrapper.setSelectFields(q.getSelect().getFields());
-		}
+		ObjectSetWrapper resultWrapper = new ObjectSetWrapper(oc, q, results);
+
 		return resultWrapper;
 	}
 
@@ -79,7 +71,7 @@ public class SqlToSoda {
 					boolean fieldOk = false;
 					for (int j = 0; j < fields.length; j++) {
 						ReflectField reflectField = fields[j];
-						System.out.println("sel: " + field + " rf:" + reflectField.getName());
+						//System.out.println("sel: " + field + " rf:" + reflectField.getName());
 						if (reflectField.getName().equals(field)) {
 							fieldOk = true;
 							break;
@@ -94,43 +86,54 @@ public class SqlToSoda {
 	}
 
 
-	private static void applyWhere(ReflectClass reflectClass, Query dq, WhereExpression where, SqlQuery q) throws CloneNotSupportedException, Sql4oException {
-		List<WhereExpression> expressions = where.getExpressions();
-		Constraint previousConstraint = null;
-		// then sub constraint, todo: make this happen somehow: AND's and OR's, etc
-		// ok, first round: just or/and the expressions to the previous constraint
-		if (!where.isRoot()) {
-			// start bracket (
+	private static void applyWhere(ReflectClass reflectClass, Query dq, SqlQuery q) throws Sql4oException {
+		if (q.getWhere() != null) {
+			WhereExpression where = q.getWhere().getRoot();
+			applyWhereRecursive(reflectClass, dq, q, where);
 		}
-		for (int i = 0; i < expressions.size(); i++) {
-			WhereExpression whereExpression = expressions.get(i);
-			if (whereExpression.getExpressions() != null && whereExpression.getExpressions().size() > 0) {
-				applyWhere(reflectClass, dq, whereExpression, q);
-			} else {
-				Constraint constraint = makeConstraint(reflectClass, dq, whereExpression, q);
-				if (previousConstraint != null) {
-					if (whereExpression.getType().equalsIgnoreCase(WhereExpression.OR)) {
-						//System.out.println("oring");
-						previousConstraint.or(constraint);
-					} else {
-						//System.out.println("anding");
-						//previousConstraint.and(constraint); // should be equivalent to not adding this
-					}
-				}
-				previousConstraint = constraint;
+	}
+
+	private static void applyWhereRecursive(ReflectClass reflectClass, Query dq, SqlQuery q, WhereExpression where) throws Sql4oException {
+		try {
+			List<WhereExpression> expressions = where.getExpressions();
+			Constraint previousConstraint = null;
+			// then sub constraint, todo: make this happen somehow: AND's and OR's, etc
+			// ok, first round: just or/and the expressions to the previous constraint
+			if (!where.isRoot()) {
+				// start bracket (
 			}
-		}
-		if (!where.isRoot()) {
-			// end bracket )
-		}
+			for (int i = 0; i < expressions.size(); i++) {
+				WhereExpression whereExpression = expressions.get(i);
+				if (whereExpression.getExpressions() != null && whereExpression.getExpressions().size() > 0) {
+					applyWhereRecursive(reflectClass, dq, q, whereExpression);
+				} else {
+					Constraint constraint = makeConstraint(reflectClass, dq, whereExpression, q);
+					if (previousConstraint != null) {
+						if (whereExpression.getType().equalsIgnoreCase(WhereExpression.OR)) {
+							//System.out.println("oring");
+							previousConstraint.or(constraint);
+						} else {
+							//System.out.println("anding");
+							//previousConstraint.and(constraint); // should be equivalent to not adding this
+						}
+					}
+					previousConstraint = constraint;
+				}
+			}
+			if (!where.isRoot()) {
+				// end bracket )
+			}
 
-
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			throw new Sql4oException("Could not apply where conditions.  Exception: " + e.getMessage());
+		}
 	}
 
 	private static Constraint makeConstraint(ReflectClass reflectClass, Query dq, WhereExpression where, SqlQuery q) throws CloneNotSupportedException, Sql4oException {
-		System.out.println("adding constraint: " + where);
+		//System.out.println("adding constraint: " + where);
 		String[] fieldSplit = where.getField().split("\\.");
-		System.out.println("split size: " + fieldSplit.length);
+		//System.out.println("split size: " + fieldSplit.length);
 
 		Query sub = dq;
 		ReflectField field = null;
@@ -150,14 +153,14 @@ public class SqlToSoda {
 					}
 				}
 			}
-			System.out.println("checking field: " + f );
+			//System.out.println("checking field: " + f );
 			field = ReflectHelper.getDeclaredFieldInHeirarchy(fieldClass, f);
 			if (field == null) throw new Sql4oException("Field not found: " + where.getField());
 			fieldClass = field.getFieldType();
 			sub = sub.descend(f);
 		}
 
-		if(field == null) throw new Sql4oException("Field not found: " + where.getField());
+		if (field == null) throw new Sql4oException("Field not found: " + where.getField());
 
 		Class c = JdkReflector.toNative(fieldClass);
 		// convert to proper object type
@@ -217,5 +220,21 @@ public class SqlToSoda {
 			constraint.equal(); // default
 		}
 
+	}
+
+	private static void applyOrderBy(ReflectClass reflectClass, Query query, SqlQuery q) {
+		OrderBy orderBy = q.getOrderBy();
+		if (orderBy != null) {
+			List<OrderBy.Field> fields = orderBy.getFields();
+			for (int i = 0; i < fields.size(); i++) {
+				OrderBy.Field field = fields.get(i);
+				System.out.println("ordering by: " + field);
+				if (field.isAscending()) {
+					query.descend(field.getName()).orderAscending();
+				} else {
+					query.descend(field.getName()).orderDescending();
+				}
+			}
+		}
 	}
 }
