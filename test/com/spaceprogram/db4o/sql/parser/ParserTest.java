@@ -38,6 +38,7 @@ public class ParserTest {
 				" ORDER BY c.id ASC")
 				, new QueryString("select c.id, c.name from Contact c where c.id = 123 and ( c.name = 'contact 1' or c.name = 'contact 2' )" +
 				" ORDER BY c.id DESC")
+				, new QueryString("from com.spaceprogram.db4o.Contact c order by name desc")
 
 
 			   };

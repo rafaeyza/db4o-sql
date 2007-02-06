@@ -43,7 +43,7 @@ public class ObjectSetMetaDataImpl implements ObjectSetMetaData {
 				for (int j = 0; j < reflectFields.length; j++) {
 					ReflectField reflectField = reflectFields[j];
 				//	System.out.println("adding field: " + reflectField.getName());
-					if (objectSetWrapper.getSelectFields() != null) {
+					if (objectSetWrapper.hasSelectFields()) {
 						if(objectSetWrapper.getSelectFields().contains(reflectField.getName())){
 				//			System.out.println("added field: " + reflectField.getName());
 							this.reflectFields.add(reflectField);
