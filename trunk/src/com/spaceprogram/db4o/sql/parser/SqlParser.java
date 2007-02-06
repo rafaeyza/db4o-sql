@@ -89,8 +89,9 @@ public class SqlParser {
 		List<String> expr = new ArrayList<String>();
 		for (String s : split) {
 			Builder builder = getBuilder(s);
+			//System.out.println("piece=" + s + ", builder=" + builder);
 			if (builder != null) {
-				//System.out.println("found builder for " + s + ": " + builder);
+			//	System.out.println("found builder for " + s + ": " + builder);
 				if (curBuilder != null) {
 					curBuilder.build(sq, expr, quotedStrings);
 				}

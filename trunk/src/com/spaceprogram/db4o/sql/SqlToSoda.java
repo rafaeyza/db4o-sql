@@ -33,7 +33,6 @@ public class SqlToSoda {
 			ClassRef classRef = q.getFrom().getClassRefs().get(i);
 			String className = classRef.getClassName();
 
-
 			// Class may not be on classpath, so lets use the generic reflector
 			ReflectClass reflectClass = oc.ext().reflector().forName(className);
 			if (reflectClass == null) {

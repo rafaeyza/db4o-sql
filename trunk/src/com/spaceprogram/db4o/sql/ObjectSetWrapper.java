@@ -1,21 +1,16 @@
 package com.spaceprogram.db4o.sql;
 
-import com.db4o.ObjectSet;
 import com.db4o.ObjectContainer;
-import com.db4o.reflect.generic.GenericObject;
-import com.db4o.reflect.generic.GenericVirtualField;
-import com.db4o.reflect.generic.GenericReflector;
-import com.db4o.reflect.ReflectField;
-import com.db4o.reflect.ReflectClass;
+import com.db4o.ObjectSet;
 import com.db4o.ext.ExtObjectSet;
+import com.db4o.reflect.ReflectField;
+import com.db4o.reflect.generic.GenericReflector;
 import com.spaceprogram.db4o.sql.query.SqlQuery;
 
-import java.util.List;
-import java.util.Iterator;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
-import java.lang.reflect.Field;
-import java.sql.SQLException;
 
 
 /**
@@ -90,7 +85,7 @@ public class ObjectSetWrapper implements ObjectSet {
         return results.hasNext();
     }
 
-    public Object next() {
+    public Result next() {
         Object next;
         if (nextResult != null) {
             next = nextResult;
@@ -103,7 +98,7 @@ public class ObjectSetWrapper implements ObjectSet {
         return new ObjectWrapper(this, next);
     }
 
-    public Object get(int index) {
+    public Result get(int index) {
         Object ret = results.get(index);
         lastResult = ret;
         // now replace with array structure based on fields chosen
