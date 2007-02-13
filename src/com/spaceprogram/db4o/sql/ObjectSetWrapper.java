@@ -6,6 +6,7 @@ import com.db4o.ext.ExtObjectSet;
 import com.db4o.reflect.ReflectField;
 import com.db4o.reflect.generic.GenericReflector;
 import com.spaceprogram.db4o.sql.query.SqlQuery;
+import com.spaceprogram.db4o.sql.metadata.ObjectSetMetaDataImpl;
 
 import java.util.Collection;
 import java.util.Iterator;

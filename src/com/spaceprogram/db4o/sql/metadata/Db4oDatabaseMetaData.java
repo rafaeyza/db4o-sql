@@ -3,7 +3,7 @@ package com.spaceprogram.db4o.sql.metadata;
 import com.spaceprogram.db4o.sql.jdbc.Db4oConnection;
 import com.spaceprogram.db4o.sql.jdbc.Db4oDriver;
 import com.spaceprogram.db4o.sql.jdbc.ListResultSet;
-import com.spaceprogram.db4o.sql.ReflectHelper;
+import com.spaceprogram.db4o.sql.util.ReflectHelper;
 import com.db4o.reflect.ReflectClass;
 import com.db4o.reflect.ReflectField;
 

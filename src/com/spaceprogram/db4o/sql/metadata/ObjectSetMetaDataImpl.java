@@ -1,4 +1,4 @@
-package com.spaceprogram.db4o.sql;
+package com.spaceprogram.db4o.sql.metadata;
 
 import com.db4o.ObjectSet;
 import com.db4o.ObjectContainer;
@@ -7,6 +7,8 @@ import com.db4o.reflect.ReflectField;
 import com.db4o.reflect.generic.GenericReflector;
 import com.spaceprogram.db4o.sql.query.SqlQuery;
 import com.spaceprogram.db4o.sql.query.From;
+import com.spaceprogram.db4o.sql.*;
+import com.spaceprogram.db4o.sql.util.ReflectHelper;
 
 import java.util.List;
 import java.util.ArrayList;

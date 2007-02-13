@@ -1,4 +1,4 @@
-package com.spaceprogram.db4o.sql;
+package com.spaceprogram.db4o.sql.util;
 
 import com.db4o.reflect.ReflectClass;
 import com.db4o.reflect.ReflectField;
