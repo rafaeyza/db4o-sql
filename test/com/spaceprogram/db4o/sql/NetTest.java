@@ -3,11 +3,9 @@ package com.spaceprogram.db4o.sql;
 import com.db4o.Db4o;
 import com.db4o.ObjectContainer;
 import com.db4o.ObjectServer;
-import com.db4o.query.Query;
 import com.db4o.reflect.ReflectClass;
-import com.spaceprogram.db4o.Contact;
-import com.spaceprogram.db4o.TestUtils;
 import com.spaceprogram.db4o.sql.parser.SqlParseException;
+import com.spaceprogram.db4o.sql.util.ReflectHelper;
 import org.junit.*;
 
 import java.util.List;
