@@ -28,38 +28,33 @@ public class ObjectSetMetaDataImpl implements ObjectSetMetaData {
 	}
 
 	private void init(ObjectSet results, ObjectSetWrapper objectSetWrapper, ObjectContainer oc, SqlQuery sqlQuery) {
-//		if (objectSetWrapper.getSelectFields() != null) {
-//			fields = objectSetWrapper.getSelectFields();
-			//reflectFields = getReflectFieldsFor(fields);
-			//columnCount = objectSetWrapper.getSelectFields().size();
-//		} else {
-			From from = sqlQuery.getFrom();
-			List<ClassRef> classRefs = from.getClassRefs();
-			for (int i = 0; i < classRefs.size(); i++) {
-				ClassRef classRef = classRefs.get(i);
-				String cname = classRef.getClassName();
-				GenericReflector reflector = oc.ext().reflector();
-				ReflectClass reflectClass = reflector.forName(cname);
-				//System.out.println("reflectClass for " + cname + " - " + reflectClass);
-				ReflectField reflectFields[] = getDeclaredFields(reflectClass);
-				for (int j = 0; j < reflectFields.length; j++) {
-					ReflectField reflectField = reflectFields[j];
-				//	System.out.println("adding field: " + reflectField.getName());
-					if (objectSetWrapper.hasSelectFields()) {
-						if(objectSetWrapper.getSelectFields().contains(reflectField.getName())){
-				//			System.out.println("added field: " + reflectField.getName());
-							this.reflectFields.add(reflectField);
-							fields.add(reflectField.getName());
-						}
-					} else {
+
+		From from = sqlQuery.getFrom();
+		List<ClassRef> classRefs = from.getClassRefs();
+		for (int i = 0; i < classRefs.size(); i++) {
+			ClassRef classRef = classRefs.get(i);
+			String cname = classRef.getClassName();
+			GenericReflector reflector = oc.ext().reflector();
+			ReflectClass reflectClass = reflector.forName(cname);
+			//System.out.println("reflectClass for " + cname + " - " + reflectClass);
+			ReflectField reflectFields[] = getDeclaredFields(reflectClass);
+			for (int j = 0; j < reflectFields.length; j++) {
+				ReflectField reflectField = reflectFields[j];
+				if (objectSetWrapper.hasSelectFields()) {
+					if (objectSetWrapper.getSelectFields().contains(reflectField.getName())) {
+						//			System.out.println("added field: " + reflectField.getName());
 						this.reflectFields.add(reflectField);
 						fields.add(reflectField.getName());
 					}
-	//			}
+				} else {
+					this.reflectFields.add(reflectField);
+					fields.add(reflectField.getName());
+				}
 			}
 		}
 
 	}
+
 	private ReflectField[] getDeclaredFields(ReflectClass reflectClass) {
 		return ReflectHelper.getDeclaredFieldsInHeirarchy(reflectClass);
 	}
@@ -78,19 +73,19 @@ public class ObjectSetMetaDataImpl implements ObjectSetMetaData {
 
 	public ReflectField getColumnReflectField(int fieldIndex) {
 		if (reflectFields.size() <= fieldIndex || fieldIndex < 0) {
-            // then out of bounds, so throw
-            throw new Sql4oRuntimeException("Field index out of bounds. received: " + fieldIndex + " max: " + reflectFields.size());
-        } else {
-            ReflectField ret = reflectFields.get(fieldIndex);
-            ret.setAccessible();
-            return ret;
-        }
+			// then out of bounds, so throw
+			throw new Sql4oRuntimeException("Field index out of bounds. received: " + fieldIndex + " max: " + reflectFields.size());
+		} else {
+			ReflectField ret = reflectFields.get(fieldIndex);
+			ret.setAccessible();
+			return ret;
+		}
 	}
 
 	public ReflectField getColumnReflectField(String fieldName) {
 		for (int i = 0; i < reflectFields.size(); i++) {
 			ReflectField reflectField = reflectFields.get(i);
-			if(reflectField.getName().equals(fieldName)){
+			if (reflectField.getName().equals(fieldName)) {
 				reflectField.setAccessible();
 				return reflectField;
 			}

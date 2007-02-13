@@ -6,7 +6,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 /**
- * Will convert fields to different types
+ * <p>
+ * Convert fields to different data types.
  * <p/>
  * User: treeder
  * Date: Aug 21, 2006
@@ -17,48 +18,67 @@ public class Converter {
 	public static DateFormat df = new SimpleDateFormat(DATE_FORMAT_PATTERN);
 
 	public static Boolean convertToBoolean(Object o) {
-        if (o instanceof Boolean) {
-            // todo: this should accept Numbers too
-            return (Boolean) o;
-        }
-        return false;
-    }
+		if (o instanceof Boolean) {
+			// todo: this should accept Numbers too
+			return (Boolean) o;
+		}
+		return false;
+	}
 
-    public static Object convertFromString(Class to, String from) throws Exception {
-        Object val = null;
+	/**
+	 * Converts a String value to the Class represented by to.
+	 * Only converts primitives and second class types like Date and String.
+	 *
+	 * @param to
+	 * @param from
+	 * @return
+	 * @throws Exception
+	 */
+	public static Object convertFromString(Class to, String from) throws Exception {
+		Object val = null;
 		//System.out.println("Class " + to);
+		// could probably just instantiate most of these things using reflection
 		if (to.isPrimitive()) {
-            if (to.isAssignableFrom(Integer.TYPE)) {
-                val = new Integer(from);
-            } else if (to.isAssignableFrom(Long.TYPE)) {
-                val = new Long(from);
-            } else if (to.isAssignableFrom(Double.TYPE)) {
-                val = new Double(from);
-            }  else if (to.isAssignableFrom(Float.TYPE)) {
-                val = new Float(from);
-            } else if (to.isAssignableFrom(Short.TYPE)) {
-                val = new Short(from);
-            } else if (to.isAssignableFrom(Byte.TYPE)) {
-                val = new Byte(from);
-            }
-            // todo: add the rest of the types
-		} else if (Number.class.isAssignableFrom(to)) {
-			if(to == Integer.class){
+			if (to.isAssignableFrom(Integer.TYPE)) {
 				val = new Integer(from);
-			} else if(to == Long.class){
+			} else if (to.isAssignableFrom(Long.TYPE)) {
 				val = new Long(from);
-			} else if(to == Float.class){
+			} else if (to.isAssignableFrom(Float.TYPE)) {
 				val = new Float(from);
-			} else if(to == Double.class){
+			} else if (to.isAssignableFrom(Double.TYPE)) {
 				val = new Double(from);
-			} else if(to == Short.class){
+			} else if (to.isAssignableFrom(Short.TYPE)) {
 				val = new Short(from);
-			} else if(to == Byte.class){
+			} else if (to.isAssignableFrom(Byte.TYPE)) {
+				val = new Byte(from);
+			} else if (to.isAssignableFrom(Boolean.TYPE)) {
+				val = new Boolean(from);
+			} else if (to.isAssignableFrom(Character.TYPE)) {
+				val = parseCharacter(from);
+			}
+
+		} else if (Boolean.class.isAssignableFrom(to)) {
+			val = new Boolean(from);
+			// todo: add the rest of the wrapper types - Boolean, Character
+		} else if (Character.class.isAssignableFrom(to)) {
+			val = parseCharacter(from);
+		} else if (Number.class.isAssignableFrom(to)) {
+			if (to == Integer.class) {
+				val = new Integer(from);
+			} else if (to == Long.class) {
+				val = new Long(from);
+			} else if (to == Float.class) {
+				val = new Float(from);
+			} else if (to == Double.class) {
+				val = new Double(from);
+			} else if (to == Short.class) {
+				val = new Short(from);
+			} else if (to == Byte.class) {
 				val = new Byte(from);
 			}
-		} else if(to == String.class){
+		} else if (to == String.class) {
 			val = from;
-		} else if(to == Date.class){
+		} else if (to == Date.class) {
 			try {
 				val = df.parse(from);
 			} catch (ParseException e) {
@@ -67,7 +87,16 @@ public class Converter {
 		} else {
 			throw new Exception("Value type is not recognized! " + to + " : " + from);
 		}
-        return val;
-    }
+		return val;
+	}
+
+	private static Object parseCharacter(String from) throws Exception {
+		Object val;
+		if (from.length() != 1) {
+			throw new Exception("Could not parse character: " + from);
+		}
+		val = new Character(from.charAt(0));
+		return val;
+	}
 
 }
