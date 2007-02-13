@@ -10,6 +10,7 @@ import com.db4o.query.Constraint;
 import com.spaceprogram.db4o.sql.query.WhereExpression;
 import com.spaceprogram.db4o.sql.query.SqlQuery;
 import com.spaceprogram.db4o.sql.query.OrderBy;
+import com.spaceprogram.db4o.sql.util.ReflectHelper;
 
 import java.util.List;
 import java.util.Date;
