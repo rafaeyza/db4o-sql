@@ -59,7 +59,7 @@ public class Db4oDriver implements Driver {
         ObjectContainer oc = null;
         try {
             oc = Db4o.openClient(hostname, port, user, password);
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new SQLException(e.getMessage());
         }
         return new Db4oConnection(this, oc);
