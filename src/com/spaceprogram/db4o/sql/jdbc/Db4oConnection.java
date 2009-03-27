@@ -1,7 +1,7 @@
 package com.spaceprogram.db4o.sql.jdbc;
 
 import com.db4o.ObjectContainer;
-import com.spaceprogram.db4o.sql.SqlParser;
+import com.spaceprogram.db4o.sql.parser.SqlParser;
 import com.spaceprogram.db4o.sql.SqlStatement;
 import com.spaceprogram.db4o.sql.metadata.Db4oDatabaseMetaData;
 import com.spaceprogram.db4o.sql.parser.SqlParseException;
@@ -716,4 +716,5 @@ public class Db4oConnection implements Connection {
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
     }
+
 }
