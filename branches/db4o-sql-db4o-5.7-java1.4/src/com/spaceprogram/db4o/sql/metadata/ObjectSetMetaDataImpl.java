@@ -77,7 +77,7 @@ public class ObjectSetMetaDataImpl implements ObjectSetMetaData {
 			throw new Sql4oRuntimeException("Field index out of bounds. received: " + fieldIndex + " max: " + reflectFields.size());
 		} else {
 			ReflectField ret = reflectFields.get(fieldIndex);
-			// ret.setAccessible();
+			ret.setAccessible();
 			return ret;
 		}
 	}
@@ -86,7 +86,7 @@ public class ObjectSetMetaDataImpl implements ObjectSetMetaData {
 		for (int i = 0; i < reflectFields.size(); i++) {
 			ReflectField reflectField = reflectFields.get(i);
 			if (reflectField.getName().equals(fieldName)) {
-				//reflectField.setAccessible();
+				reflectField.setAccessible();
 				return reflectField;
 			}
 		}
