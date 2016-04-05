@@ -1,0 +1,1 @@
+An interface to allow SQL queries into a db4o database.
